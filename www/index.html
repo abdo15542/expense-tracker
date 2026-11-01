@@ -158,6 +158,42 @@ body.dark .factor .bar2{background:#223129}
 .badge .bd{font-size:10.5px;color:var(--mut);margin-top:2px;line-height:1.6}
 .badge.lock{opacity:.38;filter:grayscale(1)}
 input[type=range]{width:100%;accent-color:var(--green)}
+/* ===== responsive hardening v4.1 ===== */
+html,body{overflow-x:hidden;max-width:100%}
+img,svg{max-width:100%}
+.card,.mini,.acct,.badge,.rc{min-width:0}
+.tx .am,.mini .v,.acct .av,.balance .val{overflow:hidden;text-overflow:ellipsis}
+.toast{max-width:92vw;white-space:normal;text-align:center;line-height:1.6}
+.factor .fl2 span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.factor .fl2 b{white-space:nowrap}
+.legend .li b{white-space:nowrap}
+@media (max-width:480px){
+ .scorebox{flex-direction:column;align-items:center;gap:10px}
+ .scorebox .factors{width:100%}
+ .wrap{padding:0 10px}
+ .card{padding:13px}
+ .hero{padding-inline:14px}
+ .grid3{grid-template-columns:1fr 1fr}
+ .grid3 .btn{grid-column:1/-1}
+ .badges{grid-template-columns:repeat(2,1fr)}
+ .donutbox{gap:10px}
+ .donutbox svg{width:96px;height:96px}
+ .legend .li{font-size:12px}
+ .tx .am{font-size:13px}
+ .tx .ic{width:40px;height:40px}
+ .insight{font-size:12.8px}
+}
+@media (max-width:360px){
+ .mini{padding:10px;gap:8px}
+ .mini .v{font-size:13px}
+ .mini .ic{width:36px;height:36px;font-size:16px}
+ .acct{padding:8px 4px}
+ .acct .av{font-size:11px}
+ .balance .val{font-size:26px}
+ .hero h1{font-size:19px}
+ .catgrid{grid-template-columns:repeat(3,1fr)}
+ nav button{font-size:10px}
+}
 .rule3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
 .rule3 .rc{border:1px solid var(--line);border-radius:14px;padding:11px 6px;background:var(--field)}
 .rule3 .rv{font-size:15px;font-weight:900;margin-top:3px}
@@ -188,7 +224,7 @@ input[type=range]{width:100%;accent-color:var(--green)}
   <section id="screen-home" class="screen on">
     <div class="pull">
       <div class="card">
-        <h2 class="sec" style="margin-top:0">✨ إضافة ذكية — اكتبها بجملة</h2>
+        <h2 class="sec" style="margin-top:0">⚡ إضافة سريعة — اكتبها بجملة</h2>
         <div class="quick"><input id="quickText" placeholder="مثال: دفعت ٥٠ قهوة وبنزين ١٠٠ أمس"><button id="quickBtn">إضافة</button></div>
         <div class="hintline">افهمها تلقائياً: المبلغ، وهل هي دخل أم مصروف، والتصنيف، والتاريخ — جرّب: «استلمت راتب ٣٠٠٠» أو «اشتريت ملابس ٢٥٠».</div>
       </div>
@@ -213,7 +249,7 @@ input[type=range]{width:100%;accent-color:var(--green)}
         <div id="goalsHome"></div>
       </div>
       <div class="card">
-        <h2 class="sec" style="margin-top:0">🧠 رؤى ذكية من بياناتك <a data-go="reports">كل التحليلات</a></h2>
+        <h2 class="sec" style="margin-top:0">📊 رؤى من بياناتك <a data-go="reports">كل التحليلات</a></h2>
         <div id="smartHome"></div>
       </div>
       <h2 class="sec">أحدث الحركات <a data-go="tx">عرض الكل</a></h2>
@@ -247,7 +283,7 @@ input[type=range]{width:100%;accent-color:var(--green)}
       <div class="scorebox" id="healthBox"></div>
     </div>
     <div class="card">
-      <h2 class="sec" style="margin-top:0">🧠 المستشار الذكي — تحليل عميق</h2>
+      <h2 class="sec" style="margin-top:0">📈 تحليل عميق لبياناتك</h2>
       <div id="smartAll"></div>
     </div>
     <div class="card">
@@ -343,7 +379,7 @@ input[type=range]{width:100%;accent-color:var(--green)}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 4.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 4.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
 </main>
 
@@ -593,7 +629,7 @@ function healthScore(){
  const activeDays=new Set(tx.map(t=>t.date)).size;
  const fTrack=Math.min(1,activeDays/Math.max(1,elapsed))*10;
  const total=Math.round(fSave+fBud+fStab+fCov+fTrack);
- return{total,f:[['الادخار من الدخل',fSave,30],['الالتزام بالميزانية',fBud,25],['استقرار المصروفات',fStab,20],['تغطية الطوارئ (رصيدك مقابل مصروف شهر)',fCov,15],['استمرارية التسجيل',fTrack,10]],
+ return{total,f:[['الادخار من الدخل',fSave,30],['الالتزام بالميزانية',fBud,25],['استقرار المصروفات',fStab,20],['تغطية الطوارئ',fCov,15],['استمرارية التسجيل',fTrack,10]],
  grade:total>=80?'ممتازة 🌟':total>=65?'جيدة 💪':total>=45?'متوسطة — يمكن تحسينها':'تحتاج انتباهاً ⚠️'};
 }
 function smartInsights(){
@@ -693,7 +729,7 @@ function renderAchv(){
  ['🌱','الخطوة الأولى','سجّل أول حركة',state.tx.length>=1],
  ['📝','مسجّل نشط','٣٠ حركة مسجلة',state.tx.length>=30],
  ['🔥','سلسلة '+streakDays()+' أيام','٧ أيام تسجيل متواصلة',streakDays()>=7],
- ['🐷','مدّخر ذكي','ادخار ≥ ٢٠٪ من دخل شهر',inc>0&&(inc-exp)/inc>=0.2],
+ ['🐷','مدّخر حكيم','ادخار ≥ ٢٠٪ من دخل شهر',inc>0&&(inc-exp)/inc>=0.2],
  ['🎯','صائد الأهداف','أكمل هدف ادخار',state.goals.some(g=>g.saved>=g.target&&g.target>0)],
  ['🔁','منظّم','فعّل حركة متكررة',state.tx.some(t=>t.recurring)],
  ['💰','رصيد متنامٍ','رصيد تراكمي ≥ ١٠٬٠٠٠',bal>=10000],
