@@ -294,6 +294,12 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <button class="chip" data-t="expense">المصروفات</button>
       <button class="chip" data-t="income">الدخل</button>
     </div>
+    <div class="chips" id="acctChips">
+      <button class="chip on" data-a="">كل الحسابات</button>
+      <button class="chip" data-a="cash">💵 نقدي</button>
+      <button class="chip" data-a="bank">🏦 بنك</button>
+      <button class="chip" data-a="wallet">📱 محفظة</button>
+    </div>
     <div class="chips" id="catChips"></div>
     <div class="card" id="txList" style="padding-top:4px;padding-bottom:8px"></div>
   </section>
@@ -345,6 +351,19 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <div class="cmp" id="cmpBox"></div>
     </div>
     <div class="card">
+      <h2 class="sec" style="margin-top:0">📊 تصنيفاتك مقارنة بالشهر الماضي</h2>
+      <div id="momCats"></div>
+    </div>
+        <div class="card">
+      <h2 class="sec" style="margin-top:0">🏦 حساباتي والتحويل بينها</h2>
+      <div id="acctBox"></div>
+      <p class="hintline">التحويل ينقل المال بين حساباتك دون أن يُحتسب دخلًا أو مصروفًا — أرصدة الرئيسية تُحدَّث فورًا.</p>
+    </div>
+    <div class="card">
+      <h2 class="sec" style="margin-top:0">📈 منحنى ادّخارك التراكمي — ١٢ شهرًا</h2>
+      <div id="cumChart"></div>
+    </div>
+<div class="card">
       <h2 class="sec" style="margin-top:0">ملخص إجمالي</h2>
       <div id="totalsBox"></div>
     </div>
@@ -417,7 +436,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 9.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -459,7 +478,13 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <div class="grid2"><input id="debtDue" type="date"><select id="debtDir"><option value="owe">🔴 دَين عليّ</option><option value="owed">🟢 لي عند غيري</option></select></div>
       <button class="btn" id="debtAdd" style="margin-top:8px">أضِف الدين</button>
     </div>
-    <div class="card">
+        <div class="card">
+      <h2 class="sec">🕌 حاسبة الزكاة — من أموالك المسجلة</h2>
+      <label class="fl">سعر غرام الذهب اليوم (بعملتك)</label>
+      <input class="fld" type="number" id="zkGold" placeholder="مثال: ٤٥٠" min="0" step="any">
+      <div id="zakatBox" style="margin-top:10px"></div>
+    </div>
+<div class="card">
       <h2 class="sec">📡 رادار السيولة — رصيدك بعد ٦٠ يوم</h2>
       <div id="radarBox"></div>
     </div>
@@ -535,8 +560,9 @@ const COLORS=['#0B8A5F','#2E7CD6','#E8A13A','#E05252','#7C5CD6','#0FA3A3','#E56A
 const CUR={LYD:'د.ل.',EGP:'ج.م',USD:'$',EUR:'€',SAR:'ر.س'};
 let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
+let acctFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.zakat=s.zakat||{gold:0}; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring;t.mood=t.mood||''}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -710,7 +736,7 @@ function renderTxList(){
  $('catChips').innerHTML='<button class="chip '+(catFilter===''?'on':'')+'" data-c="">كل التصنيفات</button>'+cats.map(c=>'<button class="chip '+(catFilter===c?'on':'')+'" data-c="'+esc(c)+'">'+catIcon(c)+' '+esc(c)+'</button>').join('');
  document.querySelectorAll('#catChips .chip').forEach(ch=>ch.onclick=()=>{catFilter=ch.dataset.c;render()});
  const q=$('search').value.trim(), from=$('dateFrom').value, to=$('dateTo').value;
- let list=monthTx().filter(t=>(typeFilter==='all'||t.type===typeFilter)&&(!catFilter||t.cat===catFilter)&&(!q||(t.note||'').includes(q)||t.cat.includes(q))&&(!from||t.date>=from)&&(!to||t.date<=to));
+ let list=monthTx().filter(t=>(typeFilter==='all'||t.type===typeFilter)&&(!catFilter||t.cat===catFilter)&&(!acctFilter||t.account===acctFilter||(t.type==='transfer'&&(t.from===acctFilter||t.to===acctFilter)))&&(!q||(t.note||'').includes(q)||t.cat.includes(q))&&(!from||t.date>=from)&&(!to||t.date<=to));
  list.sort(byDT);
  if(!list.length){$('txList').innerHTML='<div class="empty"><span class="ei">🔍</span>لا نتائج مطابقة. جرّب تغيير البحث أو الفترة.</div>';return}
  let html='',day='';
@@ -1091,6 +1117,68 @@ $('stRun').onclick=runStress;
 $('roundSave').onclick=()=>{state.round={on:$('roundOn').checked,step:parseInt($('roundStep').value)||10,goalId:$('roundGoal').value};save();renderRound();toast(state.round.on?'🐷 فُعّل التقريب الادخاري':'أُوقف التقريب الادخاري')};
 renderSafe();
 
+
+
+/* ================= v10: accounts & transfers, acct filter, MoM cats, savings curve, zakat ================= */
+function accBalance(id,endKey){return state.tx.reduce((s,t)=>{if(endKey&&t.date.slice(0,7)>endKey)return s;
+ if(t.type==='income'&&t.account===id)return s+t.amount;
+ if(t.type==='expense'&&t.account===id)return s-t.amount;
+ if(t.type==='transfer'){if(t.from===id)return s-t.amount;if(t.to===id)return s+t.amount}
+ return s},0)}
+function renderAcctFix(){const el=$('acctStrip');if(!el)return;const endKey=ym(view);
+ el.innerHTML=ACCOUNTS.map(a=>{const bal=accBalance(a[0],endKey);return '<div class="acct"><div class="ai">'+a[2]+'</div><div class="at">'+a[1]+'</div><div class="av">'+fmt(bal)+'</div></div>'}).join('')}
+const __txRowV10=txRow;
+txRow=function(t){if(t.type==='transfer'){const f=accOf(t.from),to=accOf(t.to);
+ return '<div class="tx"><div class="ic" style="background:#EAF0FE">🔄</div><div class="mid"><div class="nm">تحويل بين الحسابات</div><div class="ds">'+f[2]+' '+f[1]+' ← '+to[2]+' '+to[1]+(t.note?' • '+esc(t.note):'')+'</div></div><div><div class="am" style="color:var(--ink)">'+fmt(t.amount)+'</div><div class="tm">'+(t.time?'🕐 '+t.time+' • ':'')+t.date+'</div></div><div class="acts"><button class="iconbtn" onclick="delTx(\''+t.id+'\')" aria-label="حذف">🗑️</button></div></div>'}
+ return __txRowV10(t)};
+function renderTransfers(){const box=$('acctBox');if(!box)return;
+ const tot=ACCOUNTS.reduce((s,a)=>s+accBalance(a[0]),0);
+ box.innerHTML=ACCOUNTS.map(a=>{const b=accBalance(a[0]);return '<div class="kv"><span>'+a[2]+' '+a[1]+'</span><b style="color:'+(b<0?'var(--red)':'var(--ink)')+'">'+fmt(b)+'</b></div>'}).join('')
+ +'<div class="kv"><span>💰 صافي كل حساباتك</span><b>'+fmt(tot)+'</b></div>'
+ +'<div class="grid2" style="margin-top:10px"><div><label class="fl">من حساب</label><select class="fld" id="tfFrom">'+ACCOUNTS.map(a=>'<option value="'+a[0]+'">'+a[2]+' '+a[1]+'</option>').join('')+'</select></div>'
+ +'<div><label class="fl">إلى حساب</label><select class="fld" id="tfTo">'+ACCOUNTS.map(a=>'<option value="'+a[0]+'">'+a[2]+' '+a[1]+'</option>').join('')+'</select></div></div>'
+ +'<div class="grid2"><input class="fld" type="number" id="tfAmt" placeholder="المبلغ" min="0" step="any"><button class="btn" id="tfGo" style="margin-top:0">🔄 حوّل</button></div>';
+ const toEl=$('tfTo');if(toEl)toEl.value='bank';
+ const goEl=$('tfGo');if(goEl)goEl.onclick=doTransfer}
+function doTransfer(){const f=$('tfFrom').value,t=$('tfTo').value,v=parseFloat($('tfAmt').value);
+ if(!(v>0)){toast('أدخل مبلغ التحويل');return}
+ if(f===t){toast('اختر حسابين مختلفين');return}
+ state.tx.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),type:'transfer',cat:'تحويل',amount:v,date:todayStr(),time:nowTime(),from:f,to:t,account:f,note:''});
+ save();render();toast('🔄 تم التحويل بنجاح')}
+document.querySelectorAll('#acctChips .chip').forEach(ch=>ch.onclick=()=>{acctFilter=ch.dataset.a;render()});
+const __rtlV10=renderTxList;
+renderTxList=function(){__rtlV10();document.querySelectorAll('#acctChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.a===acctFilter))};
+function momCats(){const cur={},prev={};monthTx().filter(t=>t.type==='expense').forEach(t=>cur[t.cat]=(cur[t.cat]||0)+t.amount);
+ monthTx(monthShift(view,-1)).filter(t=>t.type==='expense').forEach(t=>prev[t.cat]=(prev[t.cat]||0)+t.amount);
+ const cats=[...new Set([...Object.keys(cur),...Object.keys(prev)])];
+ return cats.map(c=>({cat:c,cur:cur[c]||0,prev:prev[c]||0,d:(cur[c]||0)-(prev[c]||0)})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d))}
+function renderMom(){const el=$('momCats');if(!el)return;const rows=momCats();
+ el.innerHTML=rows.length?rows.map(r=>{const pct=r.prev?Math.round(r.d/r.prev*100):null;
+  return '<div class="kv"><span>'+catIcon(r.cat)+' '+esc(r.cat)+'</span><span>'+fmt(r.cur)+' <small style="color:var(--mut)">(كان '+fmt(r.prev)+')</small> <b style="color:'+(r.d>0?'var(--red)':r.d<0?'var(--green)':'var(--mut)')+'">'+(r.d===0?'—':(r.d>0?'▲':'▼')+' '+fmt(Math.abs(r.d))+(pct!==null?' • '+Math.abs(pct)+'%':''))+'</b></span></div>'}).join(''):'<div class="empty">لا مصروفات للمقارنة بعد.</div>'}
+function cumSeries(){const out=[];let run=0;for(let i=11;i>=0;i--){const d=monthShift(view,-i);const tx=monthTx(d);const net=sum(tx,'income')-sum(tx,'expense');run+=net;out.push({d,net,cum:run})}return out}
+function renderCum(){const el=$('cumChart');if(!el)return;const s=cumSeries();const max=Math.max(...s.map(x=>Math.abs(x.cum)),1);
+ el.innerHTML='<div class="chart">'+s.map((x,i)=>'<div class="col"><div class="cv">'+(x.cum?new Intl.NumberFormat('ar',{notation:'compact'}).format(x.cum):'')+'</div><div class="bar '+(i===s.length-1?'cur':'')+'" style="height:'+Math.max(3,Math.abs(x.cum)/max*95)+'px;'+(x.cum<0?'background:var(--red)':'')+'"></div><div class="cl">'+x.d.toLocaleDateString('ar',{month:'short'})+'</div></div>').join('')+'</div>'
+ +'<p class="hintline">المنحنى = مجموع (الدخل − المصروفات) تراكميًا عبر آخر ١٢ شهرًا. ارتفاعه يعني أنك تدّخر فعليًا شهرًا بعد شهر.</p>'}
+function zakatCalc(){const balances=ACCOUNTS.reduce((s,a)=>s+accBalance(a[0]),0);
+ const owedToYou=state.debts.filter(d=>d.dir==='owed').reduce((s,d)=>s+Math.max(0,d.total-d.paid),0);
+ const youOwe=state.debts.filter(d=>d.dir==='owe').reduce((s,d)=>s+Math.max(0,d.total-d.paid),0);
+ const gold=(state.zakat&&state.zakat.gold)||0;const nisab=85*gold;
+ const base=Math.max(0,balances+owedToYou-youOwe);
+ const due=(gold>0&&base>=nisab)?base*0.025:0;
+ return{balances,owedToYou,youOwe,nisab,base,due,gold}}
+function renderZakat(){const el=$('zakatBox');if(!el)return;const z=zakatCalc();
+ el.innerHTML='<div class="kv"><span>🏦 مجموع أرصدة حساباتك</span><b>'+fmt(z.balances)+'</b></div>'
+ +'<div class="kv"><span>🤝 ديون لك عند الناس (متبقّية)</span><b>'+fmt(z.owedToYou)+'</b></div>'
+ +'<div class="kv"><span>💳 ديون عليك (متبقّية)</span><b>− '+fmt(z.youOwe)+'</b></div>'
+ +'<div class="kv"><span>💰 المال الخاضع للزكاة</span><b>'+fmt(z.base)+'</b></div>'
+ +(z.gold>0?'<div class="kv"><span>⚖️ النصاب (٨٥ غرام ذهب)</span><b>'+fmt(z.nisab)+'</b></div>'
+ +'<div style="text-align:center;padding:12px 0 4px"><div class="mut">زكاتك التقديرية (٢٫٥٪)</div><div style="font-size:29px;font-weight:800;color:var(--green)">'+(z.due>0?fmt(z.due):'لا زكاة بعد — لم يبلغ النصاب')+'</div></div>'
+ :'<p class="hintline">أدخل سعر غرام الذهب الحالي بالأعلى لحساب النصاب والزكاة.</p>')
+ +'<p class="hintline">حساب تقريبي لمساعدتك، مبني على أرصدة التطبيق وديونه المسجلة؛ للزكاة شروط (حولان الحول وملك النصاب) — تحقق من حالتك الخاصة مع أهل العلم.</p>';
+ const gi=$('zkGold');if(gi&&document.activeElement!==gi)gi.value=z.gold||''}
+const __renderV10=render;render=function(){__renderV10();renderAcctFix();renderTransfers();renderMom();renderCum()};
+const __renderLabV10=renderLab;renderLab=function(){__renderLabV10();renderZakat()};
+const zkEl=$('zkGold');if(zkEl)zkEl.onchange=e=>{state.zakat=state.zakat||{gold:0};state.zakat.gold=parseFloat(e.target.value)||0;save();renderZakat();toast('🕌 حُفظ سعر الذهب')};
 
 </script>
 </body>
