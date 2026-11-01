@@ -397,7 +397,7 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 5.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 5.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
 </main>
 
@@ -497,19 +497,21 @@ const THEMES=[
 const THEME_VARS=['--green','--green-d','--bg','--card','--field','--line','--ink','--mut','--hero1','--hero2','--hero3','--tint'];
 function applyDark(){
  THEME_VARS.forEach(k=>document.body.style.removeProperty(k));
+ if(state.dark){document.body.classList.add('dark');$('darkBtn').textContent='☀️';return}
+ document.body.classList.remove('dark');
  const t=THEMES.find(x=>x.id===state.theme);
- if(t){document.body.classList.remove('dark');Object.entries(t.v).forEach(([k,val])=>document.body.style.setProperty(k,val));$('darkBtn').textContent='🎨'}
- else{document.body.classList.toggle('dark',state.dark);$('darkBtn').textContent=state.dark?'☀️':'🌙'}
+ if(t){Object.entries(t.v).forEach(([k,val])=>document.body.style.setProperty(k,val));$('darkBtn').textContent='🎨'}
+ else{$('darkBtn').textContent='🌙'}
 }
-function toggleDark(){state.theme='';state.dark=!state.dark;save();applyDark();renderThemes()}
-function pickTheme(id){state.theme=id;save();applyDark();renderThemes();const t=THEMES.find(x=>x.id===id);toast('🎨 تم تطبيق ثيم «'+t.name+'»')}
+function toggleDark(){state.dark=!state.dark;save();applyDark();renderThemes();toast(state.dark?'🌙 الوضع الليلي — ثيمك محفوظ وسيعود عند الرجوع للنهاري':'☀️ الوضع النهاري')}
+function pickTheme(id){state.theme=id;state.dark=false;save();applyDark();renderThemes();const t=THEMES.find(x=>x.id===id);toast('🎨 تم تطبيق ثيم «'+t.name+'»')}
 function renderThemes(){
  const card=t=>'<button class="theme '+(state.theme===t.id?'on':'')+'" onclick="pickTheme(\''+t.id+'\')"><span class="chk">✓</span><div class="prev" style="background:linear-gradient(135deg,'+t.v['--hero1']+','+t.v['--hero3']+')"></div><div class="tn">'+t.name+'</div><div class="td">'+t.desc+'</div></button>';
  const m=$('themesM'),f=$('themesF'); if(!m||!f)return;
  m.innerHTML=THEMES.filter(t=>t.g==='m').map(card).join('');
  f.innerHTML=THEMES.filter(t=>t.g==='f').map(card).join('');
 }
-$('themeReset').onclick=()=>{state.theme='';save();applyDark();renderThemes();toast('تمت العودة للثيم الافتراضي')};
+$('themeReset').onclick=()=>{state.theme='';state.dark=false;save();applyDark();renderThemes();toast('تمت العودة للثيم الافتراضي')};
 $('darkBtn').onclick=toggleDark; $('darkBtn2').onclick=toggleDark;
 /* ---------- render ---------- */
 function render(){
