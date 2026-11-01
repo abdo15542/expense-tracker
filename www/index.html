@@ -208,6 +208,15 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
 .rule3 .rc{border:1px solid var(--line);border-radius:14px;padding:11px 6px;background:var(--field)}
 .rule3 .rv{font-size:15px;font-weight:900;margin-top:3px}
 .rule3 .rt{font-size:11px;color:var(--mut)}
+
+/* ===== PRO FIELDS v8.2 — unified professional boxes ===== */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2>*{min-width:0}
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{width:100%;box-sizing:border-box;flex:none;background:var(--field);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--ink);min-height:50px;height:50px}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2388949E' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center;padding-left:38px;cursor:pointer}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
+.btn{min-height:50px;display:flex;align-items:center;justify-content:center}
+.card{box-shadow:0 3px 14px rgba(15,35,25,.05)}
 </style>
 </head>
 <body>
@@ -408,7 +417,7 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 8.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 8.2<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -1062,7 +1071,7 @@ function project60(){let bal=sum(state.tx,'income')-sum(state.tx,'expense');cons
  let min=days[0],firstNeg=null,negDays=0;days.forEach(x=>{if(x.bal<min.bal)min=x;if(x.bal<0){negDays++;if(!firstNeg)firstNeg=x}});
  return{days,min,firstNeg,negDays,end:days[days.length-1]}}
 function renderRadar(){const b=$('radarBox');if(!b)return;const p=project60();const maxAbs=Math.max(1,...p.days.map(x=>Math.abs(x.bal)));
- b.innerHTML='<p>رصيدك المتوقع خلال ٦٠ يومًا من التزاماتك المتكررة وديونك: ينتهي عند <b>'+fmt(p.end.bal)+'</b>، وأدنى نقطة <b style="color:'+(p.min.bal<0?'var(--red)':'var(--green)')+'">'+fmt(p.min.bal)+'</b> في '+p.min.ds+'.</p>'+(p.firstNeg?'<p style="color:var(--red)">🚨 أول عجز متوقع في '+p.firstNeg.ds+' — أمامك '+(Math.floor((Date.parse(p.firstNeg.ds)-Date.parse(todayStr()))/864e5))+' يوم للتصرّف ('+p.negDays+' يوم تحت الصفر إجمالًا).</p>':'<p style="color:var(--green)">✅ لا عجز متوقعًا في الـ ٦٠ يومًا القادمة بهذا الإيقاع.</p>')+'<div style="display:flex;align-items:flex-end;gap:1px;height:64px;direction:ltr">'+p.days.map(x=>'<div title="'+x.ds+': '+fmt(x.bal)+'" style="flex:1;min-width:2px;height:'+Math.max(4,Math.round(Math.abs(x.bal)/maxAbs*60))+'px;background:'+(x.bal<0?'var(--red)':'var(--green)')+';opacity:.85;border-radius:1px"></div>').join('')+'</div>'}
+ b.innerHTML='<p>رصيدك المتوقع خلال ٦٠ يومًا من التزاماتك المتكررة وديونك: ينتهي عند <b>'+fmt(p.end.bal)+'</b>، وأدنى نقطة <b style="color:'+(p.min.bal<0?'var(--red)':'var(--green)')+'">'+fmt(p.min.bal)+'</b> في '+p.min.ds+'.</p>'+(p.firstNeg?'<p style="color:var(--red)">🚨 أول عجز متوقع في '+p.firstNeg.ds+' — أمامك '+(Math.floor((Date.parse(p.firstNeg.ds)-Date.parse(todayStr()))/864e5))+' يوم للتصرّف ('+p.negDays+' يوم تحت الصفر إجمالًا).</p>':'<p style="color:var(--green)">✅ لا عجز متوقعًا في الـ ٦٠ يومًا القادمة بهذا الإيقاع.</p>')+'<div style="display:flex;align-items:flex-end;gap:2px;height:52px;direction:ltr;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:10px 8px 6px">'+p.days.map(x=>'<div title="'+x.ds+': '+fmt(x.bal)+'" style="flex:1;min-width:2px;height:'+Math.max(3,Math.round(Math.abs(x.bal)/maxAbs*36))+'px;background:'+(x.bal<0?'var(--red)':'var(--green)')+';opacity:.9;border-radius:2px 2px 0 0"></div>').join('')+'</div>'}
 function applySweep(tx){const r=state.round;if(!r||!r.on||tx.type!=='expense')return 0;const step=+r.step||10;const spare=Math.round((Math.ceil(tx.amount/step)*step-tx.amount)*100)/100;if(spare<=0)return 0;const g=state.goals.find(x=>x.id===r.goalId)||state.goals[0];if(!g)return 0;g.saved=(+g.saved||0)+spare;state.sweeps.push({id:'sw'+Date.now()+Math.floor(Math.random()*999),date:tx.date,amount:spare});return spare}
 function renderRound(){const b=$('roundBox');if(!b)return;const M=ym(new Date());const ms=state.sweeps.filter(s=>s.date.startsWith(M));const tot=ms.reduce((s,x)=>s+x.amount,0);const all=state.sweeps.reduce((s,x)=>s+x.amount,0);
  $('roundGoal').innerHTML=state.goals.length?state.goals.map(g=>'<option value="'+g.id+'">'+esc(g.name)+'</option>').join(''):'<option value="">— أضف هدفًا أولًا —</option>';
