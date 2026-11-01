@@ -82,8 +82,8 @@ body.dark .rank .bar2,body.dark .goal .bar2{background:#223129}
 .chip.on{background:var(--green);color:#fff;border-color:var(--green)}
 .search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;font-size:14px;background:var(--card);margin-bottom:10px}
 .search:focus,.fld:focus{outline:0;border-color:var(--green)}
-nav{position:fixed;bottom:0;right:0;left:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:20}
-nav button{background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mut);font-weight:700;padding:4px 0}
+nav{position:fixed;bottom:0;right:0;left:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:20}
+nav button{background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mut);font-weight:700;padding:4px 0;min-width:0;white-space:nowrap}
 nav button .ni{font-size:20px;line-height:1}
 nav button.on{color:var(--green)}
 .fab{position:fixed;bottom:92px;inset-inline-start:18px;width:56px;height:56px;border-radius:19px;background:var(--green);color:#fff;font-size:27px;box-shadow:0 10px 24px rgba(0,0,0,.28);z-index:21;display:grid;place-items:center}
@@ -404,7 +404,7 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 7.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 7.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
