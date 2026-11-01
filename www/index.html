@@ -8,7 +8,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--green:#0B8A5F;--green-d:#066E4B;--red:#E05252;--blue:#2E7CD6;--amber:#E8A13A;--ink:#12211C;--mut:#6B7A74;--bg:#F4F6F5;--card:#FFFFFF;--field:#FBFCFC;--line:#E6ECE9;--shadow:0 6px 24px rgba(18,33,28,.07);--r:20px;--hero1:#0DB07B;--hero2:#0B8A5F;--hero3:#065F43;--tint:#EAF6F1}
 body.dark{--ink:#EAF2EE;--mut:#93A69D;--bg:#0C1310;--card:#16211B;--field:#1B2921;--line:#26382E;--shadow:0 6px 24px rgba(0,0,0,.35)}
-body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:96px;transition:background .3s,color .3s}
+body{margin:0;font-family:var(--font,"Segoe UI",system-ui,-apple-system,Tahoma,Arial,sans-serif);background:var(--bg);color:var(--ink);padding-bottom:96px;transition:background .3s,color .3s}
 button{font-family:inherit;cursor:pointer;border:0}
 input,select{font-family:inherit;color:var(--ink)}
 .hero{background:linear-gradient(160deg,var(--hero1),var(--hero2) 45%,var(--hero3));color:#fff;padding:calc(38px + env(safe-area-inset-top)) 18px 64px;border-radius:0 0 28px 28px}
@@ -373,6 +373,13 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <div class="themes" id="themesM"></div>
       <h3 class="subh">🌸 ثيمات نسائية</h3>
       <div class="themes" id="themesF"></div>
+      <h3 class="subh">🌙 ثيمات الوضع الليلي</h3>
+      <div class="themes" id="themesN"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec" style="margin-top:0">✍️ خطوط التطبيق</h2>
+      <p class="hintline" style="margin-top:0">خطوط من نظام هاتفك نفسه — تعمل دون إنترنت، وتُطبق فوراً على التطبيق كاملاً وتُحفظ. إن لم يتوفر خط على جهازك يُستبدل بأقرب خط تلقائياً.</p>
+      <div class="themes" id="fontsGrid"></div>
     </div>
     <div class="card">
       <h2 class="sec" style="margin-top:0">🏅 إنجازاتك وأوسمتك</h2>
@@ -397,7 +404,7 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 5.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 6.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
 </main>
 
@@ -450,7 +457,7 @@ const CUR={LYD:'د.ل.',EGP:'ج.م',USD:'$',EUR:'€',SAR:'ر.س'};
 let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||'';
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||'';
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -492,7 +499,18 @@ const THEMES=[
 ['f7','f','الروز جولد','فخامة وردية','#C4744E','#A35736','#FAF1EC','#FFFFFF','#FCF6F1','#EFDBCF','#38200F','#96765E','#E0A184','#C4744E','#96502C','#F7E6DA'],
 ['f8','f','الأوركيد','بنفسجي وردي زاهي','#B04FD0','#8E35AC','#FAF0FD','#FFFFFF','#FCF6FE','#EFD6F6','#33133D','#8E6B9A','#CE7FEA','#B04FD0','#7E2599','#F6E2FC'],
 ['f9','f','البرقوقي الليلي','أنيق وغامض','#C77FB8','#A85A9C','#1D0F1E','#2C1830','#38203C','#4E2C52','#FAEDF8','#B08FA9','#5C2A63','#3F1D45','#240F28','#37203B'],
-['f10','f','الساكورا','زهور الكرز اليابانية','#DE6FA3','#C24E85','#FDF3F7','#FFFFFF','#FEF8FA','#F6DEE8','#3A1626','#9C7387','#F2A7C6','#DE6FA3','#B83A76','#FBE7F0']
+['f10','f','الساكورا','زهور الكرز اليابانية','#DE6FA3','#C24E85','#FDF3F7','#FFFFFF','#FEF8FA','#F6DEE8','#3A1626','#9C7387','#F2A7C6','#DE6FA3','#B83A76','#FBE7F0'],
+/* ليلية */
+['n1','n','منتصف الليل','أزرق ليلي عميق','#5B8DEF','#3A66C4','#070B16','#0E1626','#14203A','#22345C','#E8EEFC','#8CA0C8','#16294D','#0E1B36','#05080F','#16233F'],
+['n2','n','العنبري الليلي','دفء ذهبي خافت','#E8A13A','#C77F1F','#171106','#241A0B','#2E210E','#4A3717','#FBF3DF','#C4A97B','#3A2A0E','#241A0B','#120C04','#2E2210'],
+['n3','n','الكوني','بنفسجي فضائي','#9D7BEA','#7B55D4','#0E0819','#190E2E','#21143E','#36235C','#F0EAFB','#A894CC','#2E1A56','#1D1038','#0B0516','#22153F'],
+['n4','n','الغابي الليلي','أخضر ليلي مطمئن','#3FA46A','#2C7D4F','#071009','#0D1D12','#122616','#1E4028','#E9F5EC','#8FB598','#12351D','#0C2413','#050F08','#132A19'],
+['n5','n','العنابي العميق','أحمر ليلي راقٍ','#C94F6D','#A83A55','#160709','#240C10','#301218','#4E1E28','#FBEDEF','#C08F99','#3D121C','#28090F','#120406','#2E1218'],
+['n6','n','أعماق الفيروز','مائي ليلي هادئ','#2BB3A3','#1E8A7D','#051413','#0A201E','#0E2A27','#17423D','#E7F6F3','#84B3AB','#0E3A34','#082723','#03100F','#0E2A26'],
+['n7','n','الأسود الذهبي','فخامة ليلية','#D9B64A','#B8942F','#0A0A08','#161511','#1F1E18','#3A3626','#F7F1DC','#B3A87F','#2A2513','#191712','#080806','#23211A'],
+['n8','n','القمري','رمادي مزرق هادئ','#8FA3B8','#6C8299','#0D1117','#161C24','#1D2530','#2E3947','#EDF2F7','#97A5B4','#232E3D','#161E29','#090C10','#1C242E'],
+['n9','n','الوردي العميق','وردي ليلي أنيق','#DE7FB0','#C2548A','#170710','#260B1A','#321026','#52203C','#FBEFF5','#BE8FA9','#42122C','#2B0A1D','#13040D','#2F0F22'],
+['n10','n','النحاسي الليلي','برونزي دافئ داكن','#D08A4A','#AE6C33','#140B06','#211209','#2B190C','#472B15','#FAF0E4','#C09E7C','#38200D','#241305','#100702','#2A190D']
 ].map(a=>({id:a[0],g:a[1],name:a[2],desc:a[3],v:{'--green':a[4],'--green-d':a[5],'--bg':a[6],'--card':a[7],'--field':a[8],'--line':a[9],'--ink':a[10],'--mut':a[11],'--hero1':a[12],'--hero2':a[13],'--hero3':a[14],'--tint':a[15]}}));
 const THEME_VARS=['--green','--green-d','--bg','--card','--field','--line','--ink','--mut','--hero1','--hero2','--hero3','--tint'];
 function applyDark(){
@@ -507,9 +525,26 @@ function toggleDark(){state.dark=!state.dark;save();applyDark();renderThemes();t
 function pickTheme(id){state.theme=id;state.dark=false;save();applyDark();renderThemes();const t=THEMES.find(x=>x.id===id);toast('🎨 تم تطبيق ثيم «'+t.name+'»')}
 function renderThemes(){
  const card=t=>'<button class="theme '+(state.theme===t.id?'on':'')+'" onclick="pickTheme(\''+t.id+'\')"><span class="chk">✓</span><div class="prev" style="background:linear-gradient(135deg,'+t.v['--hero1']+','+t.v['--hero3']+')"></div><div class="tn">'+t.name+'</div><div class="td">'+t.desc+'</div></button>';
- const m=$('themesM'),f=$('themesF'); if(!m||!f)return;
+ const m=$('themesM'),f=$('themesF'),n=$('themesN'); if(!m||!f)return;
  m.innerHTML=THEMES.filter(t=>t.g==='m').map(card).join('');
  f.innerHTML=THEMES.filter(t=>t.g==='f').map(card).join('');
+ if(n)n.innerHTML=THEMES.filter(t=>t.g==='n').map(card).join('');
+ renderFonts();
+}
+/* ---------- fonts ---------- */
+const FONTS=[
+['','الحديث الافتراضي','خط نظام الهاتف','system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'],
+['naskh','النسخ الأنيق','كلاسيكي مريح للقراءة','"Noto Naskh Arabic","Traditional Arabic","Times New Roman",serif'],
+['kufi','الكوفي الهندسي','حروف هندسية عصرية','"Noto Kufi Arabic","Segoe UI",sans-serif'],
+['amiri','الأميري التراثي','روح الخط العربي الأصيل','Amiri,"Noto Naskh Arabic",serif'],
+['tahoma','تاهوما الواضح','واضح وحاد على الشاشات','Tahoma,Geneva,"Segoe UI",sans-serif'],
+['noto','نوتو العصري','خط جوجل العربي الحديث','"Noto Sans Arabic",Roboto,"Segoe UI",sans-serif']
+];
+function applyFont(){const f=FONTS.find(x=>x[0]===state.font);if(f&&f[0])document.body.style.setProperty('--font',f[3]);else document.body.style.removeProperty('--font')}
+function pickFont(id){state.font=id;save();applyFont();renderFonts();const f=FONTS.find(x=>x[0]===id);toast('✍️ تم تطبيق خط «'+f[1]+'»')}
+function renderFonts(){
+ const g=$('fontsGrid'); if(!g)return;
+ g.innerHTML=FONTS.map(f=>'<button class="theme '+(state.font===f[0]?'on':'')+'" onclick="pickFont(\''+f[0]+'\')"><span class="chk">✓</span><div style="font-family:'+f[3]+';font-size:16.5px;font-weight:700;padding:5px 2px 7px;white-space:nowrap;overflow:hidden">تتبّع المصروفات ١٢٣</div><div class="tn">'+f[1]+'</div><div class="td">'+f[2]+'</div></button>').join('');
 }
 $('themeReset').onclick=()=>{state.theme='';state.dark=false;save();applyDark();renderThemes();toast('تمت العودة للثيم الافتراضي')};
 $('darkBtn').onclick=toggleDark; $('darkBtn2').onclick=toggleDark;
@@ -843,9 +878,9 @@ function download(name,content,type){const a=document.createElement('a');a.href=
 $('exportCsv').onclick=()=>{const rows=[['التاريخ','الوقت','النوع','التصنيف','المبلغ','الحساب','متكررة','ملاحظة'],...state.tx.map(t=>[t.date,t.time||'',t.type==='income'?'دخل':'مصروف',t.cat,t.amount,accOf(t.account)[1],t.recurring?'نعم':'لا',(t.note||'').replaceAll(',',' ')])];download('expenses.csv',rows.map(r=>r.join(',')).join('\n'),'text/csv');toast('تم تصدير ملف CSV')};
 $('exportJson').onclick=()=>{download('expenses-backup.json',JSON.stringify(state,null,2),'application/json');toast('تم تنزيل النسخة الاحتياطية')};
 $('importBtn').onclick=()=>$('importFile').click();
-$('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(txt=>{try{const d=JSON.parse(txt);if(Array.isArray(d.tx)){state=Object.assign({budgets:{},catBudgets:{},goals:[],currency:'LYD',dark:false},d);state.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash'});save();applyDark();render();toast('تم استيراد البيانات بنجاح')}else toast('الملف غير صالح')}catch(_){toast('تعذّرت قراءة الملف')}})};
+$('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(txt=>{try{const d=JSON.parse(txt);if(Array.isArray(d.tx)){state=Object.assign({budgets:{},catBudgets:{},goals:[],currency:'LYD',dark:false,theme:'',font:''},d);state.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash'});save();applyDark();render();toast('تم استيراد البيانات بنجاح')}else toast('الملف غير صالح')}catch(_){toast('تعذّرت قراءة الملف')}})};
 $('wipeBtn').onclick=()=>{if(confirm('سيتم حذف كل الحركات والميزانيات والأهداف نهائياً. هل أنت متأكد؟')){state={tx:[],budgets:{},catBudgets:{},goals:[],currency:state.currency,dark:state.dark};save();render();toast('تم حذف كل البيانات')}};
-applyDark(); render();
+applyDark(); applyFont(); render();
 </script>
 </body>
 </html>
