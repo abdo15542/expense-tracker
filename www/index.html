@@ -404,7 +404,7 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 6.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 6.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
 </main>
 
@@ -513,16 +513,32 @@ const THEMES=[
 ['n10','n','النحاسي الليلي','برونزي دافئ داكن','#D08A4A','#AE6C33','#140B06','#211209','#2B190C','#472B15','#FAF0E4','#C09E7C','#38200D','#241305','#100702','#2A190D']
 ].map(a=>({id:a[0],g:a[1],name:a[2],desc:a[3],v:{'--green':a[4],'--green-d':a[5],'--bg':a[6],'--card':a[7],'--field':a[8],'--line':a[9],'--ink':a[10],'--mut':a[11],'--hero1':a[12],'--hero2':a[13],'--hero3':a[14],'--tint':a[15]}}));
 const THEME_VARS=['--green','--green-d','--bg','--card','--field','--line','--ink','--mut','--hero1','--hero2','--hero3','--tint'];
+const LIGHT_FACES={
+n1:{'--green':'#5B8DEF','--green-d':'#3A66C4','--bg':'#EAF0FD','--card':'#FFFFFF','--field':'#F4F8FE','--line':'#D3DFF5','--ink':'#12233F','--mut':'#5F779E','--hero1':'#7FA6F2','--hero2':'#5B8DEF','--hero3':'#3A66C4','--tint':'#DCE9FC'},
+n2:{'--green':'#E8A13A','--green-d':'#C77F1F','--bg':'#FBF3DF','--card':'#FFFFFF','--field':'#FEF9EC','--line':'#F0DFB8','--ink':'#3A2A0E','--mut':'#8C7440','--hero1':'#F2C063','--hero2':'#E8A13A','--hero3':'#C77F1F','--tint':'#FBEED3'},
+n3:{'--green':'#9D7BEA','--green-d':'#7B55D4','--bg':'#F1EBFD','--card':'#FFFFFF','--field':'#F8F5FE','--line':'#DED2F7','--ink':'#2A1850','--mut':'#7A68A8','--hero1':'#B79CED','--hero2':'#9D7BEA','--hero3':'#7B55D4','--tint':'#E7DFFC'},
+n4:{'--green':'#3FA46A','--green-d':'#2C7D4F','--bg':'#EAF5EE','--card':'#FFFFFF','--field':'#F4FAF5','--line':'#CFE8D6','--ink':'#12301C','--mut':'#5F7E68','--hero1':'#63BE82','--hero2':'#3FA46A','--hero3':'#2C7D4F','--tint':'#DFF2E4'},
+n5:{'--green':'#C94F6D','--green-d':'#A83A55','--bg':'#FBEFF1','--card':'#FFFFFF','--field':'#FDF6F7','--line':'#F3D3DA','--ink':'#3A121C','--mut':'#96626E','--hero1':'#E07A90','--hero2':'#C94F6D','--hero3':'#A83A55','--tint':'#F9E0E5'},
+n6:{'--green':'#2BB3A3','--green-d':'#1E8A7D','--bg':'#EAF7F4','--card':'#FFFFFF','--field':'#F3FAF8','--line':'#CDE8E2','--ink':'#0C2B27','--mut':'#5E857E','--hero1':'#4CC4B5','--hero2':'#2BB3A3','--hero3':'#1E8A7D','--tint':'#DDF2ED'},
+n7:{'--green':'#D9B64A','--green-d':'#B8942F','--bg':'#F8F3DF','--card':'#FFFFFF','--field':'#FCF8EC','--line':'#EADFB9','--ink':'#33290D','--mut':'#877A4E','--hero1':'#E3C86E','--hero2':'#D9B64A','--hero3':'#B8942F','--tint':'#F3EACB'},
+n8:{'--green':'#8FA3B8','--green-d':'#6C8299','--bg':'#EEF2F6','--card':'#FFFFFF','--field':'#F6F9FB','--line':'#D9E2EC','--ink':'#1B2836','--mut':'#68798C','--hero1':'#A9BCD2','--hero2':'#8FA3B8','--hero3':'#6C8299','--tint':'#E2EAF1'},
+n9:{'--green':'#DE7FB0','--green-d':'#C2548A','--bg':'#FBEFF5','--card':'#FFFFFF','--field':'#FDF6F9','--line':'#F3D3E2','--ink':'#38122A','--mut':'#966A84','--hero1':'#EE9CC4','--hero2':'#DE7FB0','--hero3':'#C2548A','--tint':'#F9E1EC'},
+n10:{'--green':'#D08A4A','--green-d':'#AE6C33','--bg':'#F9F0E4','--card':'#FFFFFF','--field':'#FCF6EE','--line':'#EDDCC6','--ink':'#37220E','--mut':'#8C7358','--hero1':'#E0A76A','--hero2':'#D08A4A','--hero3':'#AE6C33','--tint':'#F5E7D3'}};
 function applyDark(){
  THEME_VARS.forEach(k=>document.body.style.removeProperty(k));
- if(state.dark){document.body.classList.add('dark');$('darkBtn').textContent='☀️';return}
  document.body.classList.remove('dark');
  const t=THEMES.find(x=>x.id===state.theme);
+ if(t&&t.g==='n'){
+   const pal=state.dark?t.v:LIGHT_FACES[t.id];
+   Object.entries(pal).forEach(([k,val])=>document.body.style.setProperty(k,val));
+   $('darkBtn').textContent=state.dark?'☀️':'🌙'; return}
+ if(state.dark){document.body.classList.add('dark');$('darkBtn').textContent='☀️';return}
  if(t){Object.entries(t.v).forEach(([k,val])=>document.body.style.setProperty(k,val));$('darkBtn').textContent='🎨'}
  else{$('darkBtn').textContent='🌙'}
 }
-function toggleDark(){state.dark=!state.dark;save();applyDark();renderThemes();toast(state.dark?'🌙 الوضع الليلي — ثيمك محفوظ وسيعود عند الرجوع للنهاري':'☀️ الوضع النهاري')}
-function pickTheme(id){state.theme=id;state.dark=false;save();applyDark();renderThemes();const t=THEMES.find(x=>x.id===id);toast('🎨 تم تطبيق ثيم «'+t.name+'»')}
+function toggleDark(){state.dark=!state.dark;save();applyDark();renderThemes();const t=THEMES.find(x=>x.id===state.theme);
+ toast(t&&t.g==='n'?(state.dark?'🌙 الوجه الليلي لثيمك':'☀️ الوجه الصباحي لثيمك — نفس الثيم'):(state.dark?'🌙 الوضع الليلي — ثيمك محفوظ وسيعود عند الرجوع للنهاري':'☀️ الوضع النهاري'))}
+function pickTheme(id){const t=THEMES.find(x=>x.id===id);state.theme=id;state.dark=!!(t&&t.g==='n');save();applyDark();renderThemes();toast('🎨 تم تطبيق ثيم «'+t.name+'»')}
 function renderThemes(){
  const card=t=>'<button class="theme '+(state.theme===t.id?'on':'')+'" onclick="pickTheme(\''+t.id+'\')"><span class="chk">✓</span><div class="prev" style="background:linear-gradient(135deg,'+t.v['--hero1']+','+t.v['--hero3']+')"></div><div class="tn">'+t.name+'</div><div class="td">'+t.desc+'</div></button>';
  const m=$('themesM'),f=$('themesF'),n=$('themesN'); if(!m||!f)return;
