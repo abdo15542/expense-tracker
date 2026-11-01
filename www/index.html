@@ -245,6 +245,10 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <div class="accts" id="acctStrip"></div>
       <div class="alertbox" id="recurBox"></div>
       <div class="card">
+        <h2 class="sec" style="margin-top:0">🛡️ مصروفك الآمن اليوم</h2>
+        <div id="safeBox"></div>
+      </div>
+      <div class="card">
         <h2 class="sec" style="margin-top:0">ميزانية الشهر <a data-go="more">تعديل</a></h2>
         <div class="progress"><i id="budgetBar" style="width:0%"></i></div>
         <div class="rowb"><span id="budgetSpent">—</span><b id="budgetPct">—</b></div>
@@ -404,7 +408,7 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 7.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 8.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -439,7 +443,31 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
       <h2 class="sec">😊 نبض مزاجك المالي</h2>
       <div id="moodBox"></div>
     </div>
+        <div class="card">
+      <h2 class="sec">💳 الديون والمستحقات</h2>
+      <div id="debtBox"></div>
+      <div class="grid2"><input id="debtName" placeholder="اسم الدين (مثال: قرض أخي)"><input id="debtTotal" type="number" inputmode="decimal" placeholder="المبلغ الكلي"></div>
+      <div class="grid2"><input id="debtDue" type="date"><select id="debtDir"><option value="owe">🔴 دَين عليّ</option><option value="owed">🟢 لي عند غيري</option></select></div>
+      <button class="btn" id="debtAdd" style="margin-top:8px">أضِف الدين</button>
+    </div>
     <div class="card">
+      <h2 class="sec">📡 رادار السيولة — رصيدك بعد ٦٠ يوم</h2>
+      <div id="radarBox"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">🐷 التقريب الادخاري التلقائي</h2>
+      <div id="roundBox"></div>
+      <label class="check"><input type="checkbox" id="roundOn"> تفعيل التقريب مع كل مصروف جديد</label>
+      <div class="grid2"><select id="roundStep"><option value="5">قرّب لأقرب ٥</option><option value="10">قرّب لأقرب ١٠</option><option value="50">قرّب لأقرب ٥٠</option></select><select id="roundGoal"></select></div>
+      <button class="btn ghost" id="roundSave" style="margin-top:8px">حفظ إعدادات التقريب</button>
+    </div>
+    <div class="card">
+      <h2 class="sec">🧨 اختبار الضغط المالي — ماذا لو حدث الأسوأ؟</h2>
+      <div class="grid2"><select id="stGap"><option value="0">الدخل مستمر</option><option value="1">يتوقف الدخل شهرًا</option><option value="2">يتوقف الدخل شهرين</option><option value="3">يتوقف الدخل ٣ أشهر</option></select><input id="stEmg" type="number" inputmode="decimal" placeholder="مصروف طارئ فوري (اختياري)"></div>
+      <div class="grid2"><input id="stInf" type="number" inputmode="decimal" placeholder="نسبة غلاء المصروفات ٪ (اختياري)"><button class="btn" id="stRun">شغّل الاختبار</button></div>
+      <div id="stOut" style="margin-top:8px"><p class="mut">اختبر صمود رصيدك أمام توقف الدخل والطوارئ والغلاء — محاكاة شهرًا بشهر حتى ٢٤ شهرًا.</p></div>
+    </div>
+<div class="card">
       <h2 class="sec">🎨 بصمتك المالية — لوحة تُولد من بياناتك</h2>
       <div style="text-align:center"><canvas id="fpCanvas" width="300" height="300" style="max-width:76vw;height:auto;border-radius:20px"></canvas></div>
       <p class="mut" id="fpCap" style="text-align:center"></p>
@@ -499,7 +527,7 @@ const CUR={LYD:'د.ل.',EGP:'ج.م',USD:'$',EUR:'€',SAR:'ر.س'};
 let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8};
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring;t.mood=t.mood||''}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -882,6 +910,8 @@ function renderAchv(){
  ['📝','مسجّل نشط','٣٠ حركة مسجلة',state.tx.length>=30],
   ['🏆','بطل التحدّيات','أكمل أول تحدّي توفير في المختبر',state.challenges.some(c=>chalProgress(c).status==='done')],
   ['🧘','سيد التأجيل','تخلّى عن ٣ مشتريات مؤجلة',state.wishes.filter(w=>w.st==='dropped').length>=3],
+  ['🐷','المدّخر التلقائي','جمع ٥٠٠ بالتقريب الادخاري',state.sweeps.reduce((s,x)=>s+x.amount,0)>=500],
+  ['🤝','سدّدت أول دين','أغلق دينًا بالكامل',state.debts.some(d=>d.total>0&&debtsRemain(d)===0)],
  ['🔥','سلسلة '+streakDays()+' أيام','٧ أيام تسجيل متواصلة',streakDays()>=7],
  ['🐷','مدّخر حكيم','ادخار ≥ ٢٠٪ من دخل شهر',inc>0&&(inc-exp)/inc>=0.2],
  ['🎯','صائد الأهداف','أكمل هدف ادخار',state.goals.some(g=>g.saved>=g.target&&g.target>0)],
@@ -916,7 +946,7 @@ $('saveTx').onclick=()=>{
   if(!editingId&&fType==='expense'){const pk=normItem($('fNote').value);const pst=pk?priceStats()[pk]:null;if(pst&&pst.n>=2&&amount>pst.avg*1.25){if(!confirm('🏷️ حارس الأسعار: هذا أعلى من متوسط سعرك المعتاد لـ«'+pk+'» ('+fmt(pst.avg)+') بنسبة '+Math.round((amount/pst.avg-1)*100)+'٪ — هل أنت متأكد؟'))return}}
  const data={type:fType,amount,date,time:$('fTime').value||'',cat,note:$('fNote').value.trim(),mood:fMood,account:$('fAccount').value,recurring:$('fRecur').checked};
  if(editingId){Object.assign(state.tx.find(x=>x.id===editingId),data);toast('تم حفظ التعديل بنجاح')}
- else{state.tx.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),...data});toast('تمت إضافة الحركة بنجاح')}
+ else{const nt={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),...data};state.tx.push(nt);const sw=applySweep(nt);toast(sw>0?('تمت الإضافة — وقُرّب '+fmt(sw)+' تلقائيًا إلى هدفك 🐷'):'تمت إضافة الحركة بنجاح')}
  save();closeSheet();
  const d=new Date(date+'T12:00'); if(d.getFullYear()!==view.getFullYear()||d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1)}
  render();
@@ -1001,7 +1031,7 @@ function renderLab(){
  if(entries.length){const maxSum=Math.max(...entries.map(([,e])=>e.sum));let ins='';const rich=entries.filter(([,e])=>e.n>=2);if(rich.length>=2){const hi=rich.reduce((a,b)=>b[1].sum/b[1].n>a[1].sum/a[1].n?b:a);const lo=rich.reduce((a,b)=>b[1].sum/b[1].n<a[1].sum/a[1].n?b:a);const ratio=(hi[1].sum/hi[1].n)/(lo[1].sum/lo[1].n);if(ratio>=1.3){const mn=k=>(MOODS.find(m=>m[0]===k)||[])[2]||k;ins='<p>🔍 نمط مكتشف: متوسط صرفك وأنت «'+mn(hi[0])+'» أعلى بـ <b>'+Math.round((ratio-1)*100)+'٪</b> من صرفك وأنت «'+mn(lo[0])+'».</p>'}}
   $('moodBox').innerHTML=ins+entries.sort((a,b)=>b[1].sum-a[1].sum).map(([k,e])=>{const md=MOODS.find(m=>m[0]===k)||['','😐',k];return '<div class="tx"><div class="mid"><div class="nm">'+md[1]+' '+md[2]+'</div><div class="ds">'+e.n+' حركة • المتوسط '+fmt(e.sum/e.n)+'</div></div><div class="am" style="color:var(--red)">'+fmt(e.sum)+'</div></div><div class="progress"><i style="width:'+Math.round(e.sum/maxSum*100)+'%"></i></div>'}).join('')}
  else{$('moodBox').innerHTML='<p class="mut">عند إضافة أي مصروف اختر مزاجك من الأزرار الجديدة في نافذة الإضافة، وبعد أيام سيكشف لك التطبيق كيف يحرّك مزاجُك محفظتَك — بيانات لا يجمعها أي تطبيق مصروفات عادةً.</p>'}
- drawFP();
+ drawFP(); renderDebts(); renderRadar(); renderRound();
 }
 $('wishAdd').onclick=addWish;
 $('chalAdd').onclick=addChallenge;
@@ -1009,6 +1039,48 @@ $('workSave').onclick=()=>{state.work={salary:parseFloat($('workSalary').value)|
 $('fpSave').onclick=async()=>{const cv=$('fpCanvas');if(!cv)return;const url=cv.toDataURL('image/png');const BS=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.BackupSaver;if(BS){try{await BS.save({name:'my-fingerprint.png',content:url.split(',')[1],base64:true,mime:'image/png'});toast('✅ حُفظت اللوحة في المكان الذي اخترته')}catch(e){toast('أُلغي الحفظ')}return}const a=document.createElement('a');a.href=url;a.download='my-fingerprint.png';a.click();toast('🎨 تم تنزيل اللوحة')};
 $('fAmount').addEventListener('input',updateWorkHint);
 drawMoodChips();
+
+
+/* ================= DEEP v8 — debts, liquidity radar, safe-to-spend, round-ups, stress test ================= */
+function debtsRemain(d){return Math.max(0,(+d.total||0)-(+d.paid||0))}
+function addDebt(){const name=$('debtName').value.trim();const total=parseFloat($('debtTotal').value);const due=$('debtDue').value;const dir=$('debtDir').value;if(!name||!total||total<=0){toast('أدخل اسم الدين ومبلغه');return}state.debts.push({id:'d'+Date.now(),name,total,paid:0,due:due||'',dir});save();$('debtName').value='';$('debtTotal').value='';renderLab();toast('📌 سُجّل في الديون والمستحقات')}
+window.debtPay=id=>{const d=state.debts.find(x=>x.id===id);if(!d)return;const v=prompt('كم دفعت من «'+d.name+'»؟ المتبقي '+fmt(debtsRemain(d)),'');if(v===null)return;const a=parseFloat(v);if(!a||a<=0){toast('أدخل مبلغًا صحيحًا');return}d.paid=Math.min(d.total,(+d.paid||0)+a);save();render();renderLab();toast(debtsRemain(d)===0?'🎉 سُدّد «'+d.name+'» بالكامل!':'تم تسجيل الدفعة — المتبقي '+fmt(debtsRemain(d)))};
+window.debtDel=id=>{if(!confirm('حذف هذا الدين نهائيًا؟'))return;state.debts=state.debts.filter(x=>x.id!==id);save();renderLab()};
+function renderDebts(){const box=$('debtBox');if(!box)return;const ds=state.debts.slice().sort((a,b)=>(a.due||'9999')<(b.due||'9999')?-1:1);const oweT=state.debts.filter(d=>d.dir==='owe').reduce((s,d)=>s+debtsRemain(d),0);const owedT=state.debts.filter(d=>d.dir==='owed').reduce((s,d)=>s+debtsRemain(d),0);
+ box.innerHTML=(state.debts.length?('<p>إجمالي ما عليك: <b style="color:var(--red)">'+fmt(oweT)+'</b> • وما لك عند الآخرين: <b style="color:var(--green)">'+fmt(owedT)+'</b></p>'):'')+(ds.length?ds.map(d=>{const r=debtsRemain(d);const pct=d.total?Math.round((d.paid||0)/d.total*100):0;const late=d.due&&r>0&&d.due<todayStr();return '<div class="tx"><div class="mid"><div class="nm">'+(d.dir==='owe'?'🔴':'🟢')+' '+esc(d.name)+(r===0?' ✅ سُدّد':'')+'</div><div class="ds">المتبقي '+fmt(r)+' من '+fmt(d.total)+(d.due?' • الاستحقاق '+d.due:'')+(late?' • ⚠️ متأخر!':'')+'</div><div class="progress"><i style="width:'+pct+'%"></i></div></div>'+(r>0?'<button class="chip" style="cursor:pointer" onclick="debtPay(\''+d.id+'\')">دفعة</button>':'')+'<button class="chip" style="cursor:pointer" onclick="debtDel(\''+d.id+'\')">حذف</button></div>'}).join(''):'<p class="mut">لا ديون مسجلة. سجّل ما عليك وما لك، وسيحذّرك التطبيق قبل الاستحقاق ويدخل الديون في حسابات السيولة والأمان تلقائيًا.</p>')}
+function recTemplates(){const seen={},out=[];state.tx.filter(t=>t.recurring).forEach(t=>{const k=t.type+'|'+t.cat+'|'+t.amount+'|'+t.date.slice(8,10);if(!seen[k]){seen[k]=1;out.push(t)}});return out}
+function safeToday(){const now=new Date();const M=ym(now);const txs=state.tx.filter(t=>t.date.startsWith(M));const incAct=sum(txs,'income'),expAct=sum(txs,'expense');const daysIn=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();const left=Math.max(1,daysIn-now.getDate()+1);const lastDay=M+'-'+String(daysIn).padStart(2,'0');
+ const inMonth=(t)=>txs.some(x=>x.type===t.type&&x.cat===t.cat&&x.amount===t.amount);
+ const futInc=recTemplates().filter(t=>t.type==='income'&&!inMonth(t)).reduce((s,t)=>s+t.amount,0);
+ const futExp=recTemplates().filter(t=>t.type==='expense'&&!inMonth(t)).reduce((s,t)=>s+t.amount,0);
+ const debtsDue=state.debts.filter(d=>d.dir==='owe'&&d.due&&d.due<=lastDay).reduce((s,d)=>s+debtsRemain(d),0);
+ const pool=incAct+futInc-expAct-futExp-debtsDue;return{safe:Math.max(0,pool/left),pool,left,futInc,futExp,debtsDue,incAct,expAct}}
+function renderSafe(){const b=$('safeBox');if(!b)return;const s=safeToday();const late=state.debts.filter(d=>d.dir==='owe'&&d.due&&d.due<todayStr()&&debtsRemain(d)>0);
+ b.innerHTML='<div style="text-align:center;padding:6px 0"><div class="mut">تستطيع صرف هذا المبلغ اليوم بأمان</div><div style="font-size:34px;font-weight:800;color:'+(s.safe>0?'var(--green)':'var(--red)')+'">'+fmt(s.safe)+'</div><div class="mut">لكل يوم من الأيام الـ '+s.left+' المتبقية في الشهر، بعد حجز الالتزامات القادمة'+(s.futExp?' ('+fmt(s.futExp)+' متكررة)':'')+(s.debtsDue?' والديون المستحقة ('+fmt(s.debtsDue)+')':'')+'</div></div>'+(late.length?'<p style="color:var(--red)">⚠️ لديك '+late.length+' من الديون المتأخرة — راجع قسم الديون في المختبر.</p>':'')+(s.pool<0?'<p style="color:var(--red)">⚠️ التزاماتك هذا الشهر تتجاوز مواردك المتوقعة بـ '+fmt(-s.pool)+' — خفّف المصروفات المتغيرة فورًا.</p>':'')}
+function project60(){let bal=sum(state.tx,'income')-sum(state.tx,'expense');const recs=recTemplates();const days=[];const t0=new Date();
+ for(let i=0;i<60;i++){const d=new Date(t0.getTime()+i*864e5);const ds=d.toISOString().slice(0,10);const dom=ds.slice(8,10);recs.forEach(t=>{if(t.date.slice(8,10)===dom)bal+=t.type==='income'?t.amount:-t.amount});state.debts.forEach(db=>{if(db.due===ds&&debtsRemain(db)>0)bal+=db.dir==='owe'?-debtsRemain(db):debtsRemain(db)});days.push({ds,bal})}
+ let min=days[0],firstNeg=null,negDays=0;days.forEach(x=>{if(x.bal<min.bal)min=x;if(x.bal<0){negDays++;if(!firstNeg)firstNeg=x}});
+ return{days,min,firstNeg,negDays,end:days[days.length-1]}}
+function renderRadar(){const b=$('radarBox');if(!b)return;const p=project60();const maxAbs=Math.max(1,...p.days.map(x=>Math.abs(x.bal)));
+ b.innerHTML='<p>رصيدك المتوقع خلال ٦٠ يومًا من التزاماتك المتكررة وديونك: ينتهي عند <b>'+fmt(p.end.bal)+'</b>، وأدنى نقطة <b style="color:'+(p.min.bal<0?'var(--red)':'var(--green)')+'">'+fmt(p.min.bal)+'</b> في '+p.min.ds+'.</p>'+(p.firstNeg?'<p style="color:var(--red)">🚨 أول عجز متوقع في '+p.firstNeg.ds+' — أمامك '+(Math.floor((Date.parse(p.firstNeg.ds)-Date.parse(todayStr()))/864e5))+' يوم للتصرّف ('+p.negDays+' يوم تحت الصفر إجمالًا).</p>':'<p style="color:var(--green)">✅ لا عجز متوقعًا في الـ ٦٠ يومًا القادمة بهذا الإيقاع.</p>')+'<div style="display:flex;align-items:flex-end;gap:1px;height:64px;direction:ltr">'+p.days.map(x=>'<div title="'+x.ds+': '+fmt(x.bal)+'" style="flex:1;min-width:2px;height:'+Math.max(4,Math.round(Math.abs(x.bal)/maxAbs*60))+'px;background:'+(x.bal<0?'var(--red)':'var(--green)')+';opacity:.85;border-radius:1px"></div>').join('')+'</div>'}
+function applySweep(tx){const r=state.round;if(!r||!r.on||tx.type!=='expense')return 0;const step=+r.step||10;const spare=Math.round((Math.ceil(tx.amount/step)*step-tx.amount)*100)/100;if(spare<=0)return 0;const g=state.goals.find(x=>x.id===r.goalId)||state.goals[0];if(!g)return 0;g.saved=(+g.saved||0)+spare;state.sweeps.push({id:'sw'+Date.now()+Math.floor(Math.random()*999),date:tx.date,amount:spare});return spare}
+function renderRound(){const b=$('roundBox');if(!b)return;const M=ym(new Date());const ms=state.sweeps.filter(s=>s.date.startsWith(M));const tot=ms.reduce((s,x)=>s+x.amount,0);const all=state.sweeps.reduce((s,x)=>s+x.amount,0);
+ $('roundGoal').innerHTML=state.goals.length?state.goals.map(g=>'<option value="'+g.id+'">'+esc(g.name)+'</option>').join(''):'<option value="">— أضف هدفًا أولًا —</option>';
+ if(document.activeElement!==$('roundGoal'))$('roundGoal').value=state.round.goalId||'';if(document.activeElement!==$('roundStep'))$('roundStep').value=String(state.round.step||10);$('roundOn').checked=!!state.round.on;
+ b.innerHTML=state.goals.length?('<p>🐷 قرّبنا تلقائيًا هذا الشهر: <b>'+fmt(tot)+'</b> من '+ms.length+' حركة، وإجمالي ما جُمع بالتقريب منذ البداية: <b>'+fmt(all)+'</b> يذهب إلى هدفك المختار دون أن تشعر.</p>'+(ms.length?ms.slice(-4).reverse().map(s=>'<div class="ds">'+s.date+' • +'+fmt(s.amount)+'</div>').join(''):'')):'<p class="mut">أنشئ هدف ادخار أولًا من «الرئيسية»، ثم فعّل التقريب: كل مصروف يُقرَّب لأعلى خطوة تختارها، ويذهب الفرق تلقائيًا إلى هدفك مع كل حركة.</p>'}
+function runStress(){const gap=parseInt($('stGap').value)||0;const emg=parseFloat($('stEmg').value)||0;const inf=parseFloat($('stInf').value)||0;let bal=sum(state.tx,'income')-sum(state.tx,'expense');const inc=monthlyAvg('income');const expA=monthlyAvg('expense')*(1+inf/100);let b=bal-emg;let survive=24,brokeAt=0;const rows=[];
+ for(let i=1;i<=24;i++){b+=(i<=gap?0:inc)-expA;rows.push({i,b});if(b<0){survive=i-1;brokeAt=i;break}}
+ const verdict=b<0&&emg>0&&rows.length===0?'':'';let head;
+ if(bal-emg<0){head='🚨 رصيدك الحالي لا يتحمّل وحده طارئًا بهذا الحجم — أولويتك القصوى بناء وسادة أمان.'}
+ else if(brokeAt){head='⚠️ بهذا السيناريو تصمد ≈ '+survive+' شهر ثم ينكسر رصيدك في الشهر '+brokeAt+'.'}
+ else{head='🏆 ممتاز — تصمد ٢٤ شهرًا كاملة حتى في هذا السيناريو القاسي.'}
+ $('stOut').innerHTML='<p><b>'+head+'</b></p><p class="mut">الافتراضات: دخلك الشهري المتوسط '+fmt(inc)+' (يتوقف '+gap+' شهر)، مصروفاتك '+fmt(expA)+' شهريًا'+(inf?' بعد غلاء '+inf+'٪':'')+', طارئ فوري '+fmt(emg)+'. الرصيد الابتدائي '+fmt(bal)+'.</p>'+rows.slice(0,12).map(r=>'<div class="tx"><div class="mid"><div class="nm">الشهر '+r.i+'</div></div><div class="am" style="color:'+(r.b<0?'var(--red)':'var(--green)')+'">'+fmt(r.b)+'</div></div>').join('')}
+const __renderV8=render;render=function(){__renderV8();renderSafe()};
+const __goV8=go;go=function(n){__goV8(n);if(n==='lab')renderLab()};
+$('debtAdd').onclick=addDebt;
+$('stRun').onclick=runStress;
+$('roundSave').onclick=()=>{state.round={on:$('roundOn').checked,step:parseInt($('roundStep').value)||10,goalId:$('roundGoal').value};save();renderRound();toast(state.round.on?'🐷 فُعّل التقريب الادخاري':'أُوقف التقريب الادخاري')};
+renderSafe();
 
 </script>
 </body>
