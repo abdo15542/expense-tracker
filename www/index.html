@@ -217,13 +217,6 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
 .btn{min-height:50px;display:flex;align-items:center;justify-content:center}
 .card{box-shadow:0 3px 14px rgba(15,35,25,.05)}
-
-.ageHero{background:linear-gradient(135deg,var(--hero1),var(--hero2),var(--hero3));color:#fff;border-radius:16px;padding:20px 16px;text-align:center;margin-bottom:12px}
-.ageHero .big{font-size:46px;font-weight:800;line-height:1.15}
-.ageTiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:6px}
-.ageTile{background:var(--field);border:1px solid var(--line);border-radius:14px;padding:11px 4px;text-align:center}
-.ageTile b{display:block;font-size:16.5px;margin-bottom:2px}
-.ageTile span{font-size:11px;color:var(--mut);font-weight:700}
 </style>
 </head>
 <body>
@@ -424,7 +417,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 9.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 9.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -432,21 +425,6 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <p class="mut">أدوات لا تجدها في تطبيقات المصروفات المعتادة — صُنعت خصيصًا لك، وتعمل كلها محليًا على هاتفك دون أي اتصال.</p>
     </div>
         <div class="card">
-      <h2 class="sec" style="margin-top:0">🎂 قسم العمر — لوحة حياتك كاملة</h2>
-      <div id="ageHero"></div>
-      <div class="grid2"><input type="date" id="ageDate"><input type="time" id="ageTime"></div>
-      <button class="btn" id="ageSave">احسب عمرك بالكامل</button>
-      <p class="mut">وقت الولادة اختياري — يزيد دقة عدّاد الثواني. كل الحسابات فورية على هاتفك ولا تُحفظ إلا عندك.</p>
-    </div>
-    <div class="card">
-      <h2 class="sec">📊 تفاصيل عمرك الكاملة</h2>
-      <div id="ageDetails"></div>
-    </div>
-    <div class="card">
-      <h2 class="sec">🏁 محطاتك وكواكبك</h2>
-      <div id="ageMiles"></div>
-    </div>
-<div class="card">
       <h2 class="sec">⏳ القرار المؤجَّل — قبل أن تشتري</h2>
       <div id="wishBox"></div>
       <div class="grid2"><input id="wishName" placeholder="ماذا تريد أن تشتري؟"><input id="wishPrice" type="number" inputmode="decimal" placeholder="السعر"></div>
@@ -558,7 +536,7 @@ const CUR={LYD:'د.ل.',EGP:'ج.م',USD:'$',EUR:'€',SAR:'ر.س'};
 let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.birth=s.birth||null; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring;t.mood=t.mood||''}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -1062,7 +1040,7 @@ function renderLab(){
  if(entries.length){const maxSum=Math.max(...entries.map(([,e])=>e.sum));let ins='';const rich=entries.filter(([,e])=>e.n>=2);if(rich.length>=2){const hi=rich.reduce((a,b)=>b[1].sum/b[1].n>a[1].sum/a[1].n?b:a);const lo=rich.reduce((a,b)=>b[1].sum/b[1].n<a[1].sum/a[1].n?b:a);const ratio=(hi[1].sum/hi[1].n)/(lo[1].sum/lo[1].n);if(ratio>=1.3){const mn=k=>(MOODS.find(m=>m[0]===k)||[])[2]||k;ins='<p>🔍 نمط مكتشف: متوسط صرفك وأنت «'+mn(hi[0])+'» أعلى بـ <b>'+Math.round((ratio-1)*100)+'٪</b> من صرفك وأنت «'+mn(lo[0])+'».</p>'}}
   $('moodBox').innerHTML=ins+entries.sort((a,b)=>b[1].sum-a[1].sum).map(([k,e])=>{const md=MOODS.find(m=>m[0]===k)||['','😐',k];return '<div class="tx"><div class="mid"><div class="nm">'+md[1]+' '+md[2]+'</div><div class="ds">'+e.n+' حركة • المتوسط '+fmt(e.sum/e.n)+'</div></div><div class="am" style="color:var(--red)">'+fmt(e.sum)+'</div></div><div class="progress"><i style="width:'+Math.round(e.sum/maxSum*100)+'%"></i></div>'}).join('')}
  else{$('moodBox').innerHTML='<p class="mut">عند إضافة أي مصروف اختر مزاجك من الأزرار الجديدة في نافذة الإضافة، وبعد أيام سيكشف لك التطبيق كيف يحرّك مزاجُك محفظتَك — بيانات لا يجمعها أي تطبيق مصروفات عادةً.</p>'}
- drawFP(); renderDebts(); renderRadar(); renderRound(); renderAge();
+ drawFP(); renderDebts(); renderRadar(); renderRound();
 }
 $('wishAdd').onclick=addWish;
 $('chalAdd').onclick=addChallenge;
@@ -1113,73 +1091,6 @@ $('stRun').onclick=runStress;
 $('roundSave').onclick=()=>{state.round={on:$('roundOn').checked,step:parseInt($('roundStep').value)||10,goalId:$('roundGoal').value};save();renderRound();toast(state.round.on?'🐷 فُعّل التقريب الادخاري':'أُوقف التقريب الادخاري')};
 renderSafe();
 
-
-/* ================= AGE SECTION v9 — complete life details ================= */
-function anum(n){return new Intl.NumberFormat('ar').format(Math.floor(n))}
-let ageTimer=null;
-function zodiacOf(m,d){const Z=[[1,19,'الجدي ♑','الدلو ♒'],[2,18,'الدلو ♒','الحوت ♓'],[3,20,'الحوت ♓','الحمل ♈'],[4,19,'الحمل ♈','الثور ♉'],[5,20,'الثور ♉','الجوزاء ♊'],[6,21,'الجوزاء ♊','السرطان ♋'],[7,22,'السرطان ♋','الأسد ♌'],[8,22,'الأسد ♌','العذراء ♍'],[9,22,'العذراء ♍','الميزان ♎'],[10,23,'الميزان ♎','العقرب ♏'],[11,22,'العقرب ♏','القوس ♐'],[12,21,'القوس ♐','الجدي ♑']];const z=Z[m-1];return d<z[1]?z[2]:z[3]}
-function chineseOf(y){const A=['القرد 🐵','الديك 🐓','الكلب 🐕','الخنزير 🐖','الفأر 🐀','الثور 🐂','النمر 🐅','الأرنب 🐇','التنين 🐉','الأفعى 🐍','الحصان 🐎','العنزة 🐐'];return A[y%12]}
-function generationOf(y){if(y<1946)return 'الجيل الصامت';if(y<1965)return 'جيل الطفرة (Boomers)';if(y<1981)return 'الجيل X';if(y<1997)return 'جيل الألفية (Millennials)';if(y<2013)return 'الجيل Z';if(y<2025)return 'جيل ألفا';return 'جيل بيتا'}
-function seasonOf(m){return m===12||m<=2?'الشتاء ❄️':m<=5?'الربيع 🌸':m<=8?'الصيف ☀️':'الخريف 🍂'}
-function ageCalc(){const b=state.birth;if(!b||!b.date)return null;const P=b.date.split('-').map(Number);if(P.length<3)return null;const T=(b.time||'00:00').split(':').map(Number);const bd=new Date(P[0],P[1]-1,P[2],T[0]||0,T[1]||0);const now=new Date();if(isNaN(bd.getTime())||bd>now)return null;
- let y=now.getFullYear()-P[0],mo=now.getMonth()-(P[1]-1),d=now.getDate()-P[2];
- if(d<0){mo--;d+=new Date(now.getFullYear(),now.getMonth(),0).getDate()}
- if(mo<0){y--;mo+=12}
- const ms=now-bd,days=Math.floor(ms/864e5);
- let nb=new Date(now.getFullYear(),P[1]-1,P[2]);const today0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
- if(nb<today0)nb=new Date(now.getFullYear()+1,P[1]-1,P[2]);
- const daysToNB=Math.round((nb-today0)/864e5);const lastB=new Date(nb.getFullYear()-1,P[1]-1,P[2]);
- const yearPct=Math.min(100,Math.max(0,(today0-lastB)/(nb-lastB)*100));
- return{bd,P,y,mo,d,days,hours:Math.floor(ms/36e5),mins:Math.floor(ms/6e4),secs:Math.floor(ms/1e3),nb,daysToNB,yearPct,turnAge:nb.getFullYear()-P[0]}}
-function ageMilestones(a){const bd=a.bd;const L=[];const add=(label,date)=>L.push({label,date,done:date<=new Date()});
- add('١٬٠٠٠ أسبوع من الحياة',new Date(bd.getTime()+7000*864e5));
- add('١٠٬٠٠٠ يوم من الحياة',new Date(bd.getTime()+10000*864e5));
- add('٥٠٠ شهر من الحياة',new Date(bd.getFullYear(),bd.getMonth()+500,bd.getDate()));
- add('١ مليار ثانية من الحياة',new Date(bd.getTime()+1e9*1000));
- add('عيد الميلاد الـ ٢٥',new Date(bd.getFullYear()+25,bd.getMonth(),bd.getDate()));
- add('عيد الميلاد الـ ٥٠',new Date(bd.getFullYear()+50,bd.getMonth(),bd.getDate()));
- add('٢٥٬٠٠٠ يوم من الحياة',new Date(bd.getTime()+25000*864e5));
- add('عيد الميلاد الـ ٧٥',new Date(bd.getFullYear()+75,bd.getMonth(),bd.getDate()));
- return L.sort((x,y2)=>x.date-y2.date)}
-function dstr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function renderAge(){const hero=$('ageHero'),det=$('ageDetails'),mile=$('ageMiles');if(!hero)return;
- if(document.activeElement!==$('ageDate'))$('ageDate').value=(state.birth&&state.birth.date)||'';
- if(document.activeElement!==$('ageTime'))$('ageTime').value=(state.birth&&state.birth.time)||'';
- const a=ageCalc();
- if(ageTimer){clearInterval(ageTimer);ageTimer=null}
- if(!a){hero.innerHTML='<p class="mut" style="text-align:center;padding:8px 0">اكتب تاريخ ميلادك بالأسفل وستظهر لك لوحة عمرك كاملة: عمرك الدقيق بالسنوات والأشهر والأيام والثواني الحية، ويوم ميلادك وتاريخه الهجري وبرجك ومحطات عمرك القادمة وعمرك على الكواكب.</p>';det.innerHTML='';mile.innerHTML='';return}
- const wd=a.bd.toLocaleDateString('ar',{weekday:'long'});
- let hijri='';try{hijri=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(a.bd)}catch(e){try{hijri=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'}).format(a.bd)}catch(e2){}}
- hero.innerHTML='<div class="ageHero"><div style="opacity:.85;font-weight:700">🎂 عمرك الآن</div><div class="big">'+anum(a.y)+' سنة</div><div style="font-size:17px;font-weight:700">'+anum(a.mo)+' شهرًا و '+anum(a.d)+' يومًا</div><div style="margin-top:6px;opacity:.9">⏱️ عشت حتى هذه اللحظة <b class="ageSecsLive">'+anum(a.secs)+'</b> ثانية</div></div>';
- const tile=(v,l)=>'<div class="ageTile"><b>'+v+'</b><span>'+l+'</span></div>';
- const row=(ic,t,v)=>'<div class="tx"><div class="mid"><div class="nm">'+ic+' '+t+'</div></div><div class="am" style="color:var(--ink)">'+v+'</div></div>';
- det.innerHTML='<div class="ageTiles">'
- +tile(anum(a.y*12+a.mo),'إجمالي الأشهر')+tile(anum(a.days/7),'إجمالي الأسابيع')+tile(anum(a.days),'إجمالي الأيام')
- +tile(anum(a.hours),'إجمالي الساعات')+tile(anum(a.mins),'إجمالي الدقائق')+'<div class="ageTile"><b class="ageSecsLive">'+anum(a.secs)+'</b><span>إجمالي الثواني</span></div>'
- +'</div>'
- +row('📅','وُلدت يوم',wd)
- +(hijri?row('🌙','تاريخ ميلادك بالهجري',hijri):'')
- +row('⭐','برجك الفلكي',zodiacOf(a.P[1],a.P[2]))
- +row('🐉','برجك الصيني',chineseOf(a.P[0]))
- +row('👥','جيلك',generationOf(a.P[0]))
- +row('🍂','فصل ميلادك',seasonOf(a.P[1]))
- +'<div style="margin-top:12px"><div class="nm" style="margin-bottom:6px">🎂 عيد ميلادك القادم بعد <b>'+anum(a.daysToNB)+'</b> يوم — '+dstr(a.nb)+' ('+a.nb.toLocaleDateString('ar',{weekday:'long'})+') وتتمّ فيه '+anum(a.turnAge)+' سنة</div><div class="progress"><i style="width:'+a.yearPct.toFixed(1)+'%"></i></div><div class="ds">انقضى '+a.yearPct.toFixed(1)+'٪ من سنتك الحالية</div></div>';
- const ms=ageMilestones(a);const passed=ms.filter(x=>x.done);const next=ms.filter(x=>!x.done).slice(0,4);
- const planets=[['عطارد',88],['الزهرة',225],['المريخ',687],['المشتري',4333],['زحل',10759]];
- const journey=Math.min(100,a.days/(76*365.25)*100);
- mile.innerHTML='<div class="nm" style="margin-bottom:6px">🏁 محطات عمرك</div>'
- +(passed.length?'<div class="ds" style="margin-bottom:6px">✅ آخر محطة حققتها: '+passed[passed.length-1].label+' ('+dstr(passed[passed.length-1].date)+')</div>':'')
- +next.map(x=>'<div class="tx"><div class="mid"><div class="nm">'+x.label+'</div><div class="ds">'+dstr(x.date)+'</div></div><div class="am" style="color:var(--green)">بعد '+anum(Math.ceil((x.date-new Date())/864e5))+' يوم</div></div>').join('')
- +'<div class="nm" style="margin:12px 0 6px">🪐 عمرك على الكواكب الأخرى</div><div class="ageTiles">'
- +planets.map(p=>tile((a.days/p[1]).toFixed(1)+' سنة',p[0])).join('')+tile((a.days/365.25).toFixed(1)+' سنة','الأرض 🌍')+'</div>'
- +'<div class="nm" style="margin:12px 0 6px">🌍 رحلة العمر (تقدير إحصائي)</div>'
- +row('❤️','نبضات قلبك تقريبًا',anum(a.days*24*60*72)+' نبضة')
- +row('🌬️','أنفاسك تقريبًا',anum(a.days*24*60*16)+' نفَس')
- +row('😴','نومك حتى الآن',anum(a.days/3)+' يوم ≈ '+(a.days/3/365.25).toFixed(1)+' سنة')
- +'<div class="progress" style="margin-top:8px"><i style="width:'+journey.toFixed(1)+'%"></i></div><div class="ds">قطعت نحو '+journey.toFixed(1)+'٪ من متوسط عمر الإنسان عالميًا (≈ ٧٦ سنة) — أرقام النبض والنفس تقديرية بافتراض معدلات متوسطة.</div>';
- ageTimer=setInterval(()=>{const n=ageCalc();if(!n)return;document.querySelectorAll('.ageSecsLive').forEach(e=>e.textContent=anum(n.secs))},1000)}
-$('ageSave').onclick=()=>{const d=$('ageDate').value;if(!d){toast('اختر تاريخ ميلادك أولًا');return}const t=$('ageTime').value||'';state.birth={date:d,time:t};save();renderAge();toast('🎂 حُفظ — هذه لوحة عمرك كاملة')};
-const __goAge=go;go=function(n){if(n!=='lab'&&ageTimer){clearInterval(ageTimer);ageTimer=null}__goAge(n)};
 
 </script>
 </body>
