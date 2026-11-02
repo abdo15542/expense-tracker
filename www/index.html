@@ -379,10 +379,16 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
     </div>
     <div class="card">
       <h2 class="sec" style="margin-top:0">🧾 كشف حساب</h2>
-      <div class="grid2"><select class="fld" id="stmtAcct"><option value="cash">💵 نقدي</option><option value="bank">🏦 بنك</option><option value="wallet">📱 محفظة إلكترونية</option></select><input class="fld" type="month" id="stmtMonth"></div>
+      <div class="grid2"><select class="fld" id="stmtAcct"><option value="all">🌐 كل الحسابات</option><option value="cash">💵 نقدي</option><option value="bank">🏦 بنك</option><option value="wallet">📱 محفظة إلكترونية</option></select><input class="fld" type="month" id="stmtMonth"></div>
       <button class="btn" id="stmtGo" style="margin-top:8px">عرض الكشف</button>
       <div id="stmtBox" style="margin-top:10px"></div>
       <button class="btn ghost" id="stmtShare" style="margin-top:8px">📤 مشاركة الكشف نصيًا</button>
+      <div style="border-top:1px dashed var(--line);margin:12px 0"></div>
+      <label class="fl">نطاق كشف الـ PDF المفصّل (يتبع اختيار الحساب بالأعلى)</label>
+      <select class="fld" id="pdfRange"><option value="all">🌐 كل الفترات — شامل كل المصاريف</option><option value="month">هذا الشهر</option><option value="last">الشهر الماضي</option><option value="3m">آخر ٣ أشهر</option><option value="custom">نطاق مخصص...</option></select>
+      <div class="grid2" id="pdfDates" style="display:none;margin-top:8px"><input class="fld" type="date" id="pdfFrom"><input class="fld" type="date" id="pdfTo"></div>
+      <button class="btn" id="pdfBtn" style="margin-top:8px">📄 إنشاء كشف حساب PDF مفصّل</button>
+      <p class="mut" style="margin-top:8px">ملف PDF منسّق بدقة: ملخص بالأرصدة الافتتاحية والختامية، توزيع المصاريف والدخل حسب الفئة، وجدول زمني بكل حركة مع رصيدها الجاري — تختار مكان حفظه، جاهز للمشاركة أو الطباعة.</p>
     </div>
         <div class="card">
       <h2 class="sec" style="margin-top:0">🏦 حساباتي والتحويل بينها</h2>
@@ -482,7 +488,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <button class="btn ghost" id="abOffBtn" style="margin-top:8px;display:none">⏸️ إيقاف النسخ التلقائي</button>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 11.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 11.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
