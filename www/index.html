@@ -436,7 +436,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -479,12 +479,6 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <button class="btn" id="debtAdd" style="margin-top:8px">أضِف الدين</button>
     </div>
         <div class="card">
-      <h2 class="sec">🕌 حاسبة الزكاة — من أموالك المسجلة</h2>
-      <label class="fl">سعر غرام الذهب اليوم (بعملتك)</label>
-      <input class="fld" type="number" id="zkGold" placeholder="مثال: ٤٥٠" min="0" step="any">
-      <div id="zakatBox" style="margin-top:10px"></div>
-    </div>
-<div class="card">
       <h2 class="sec">📡 رادار السيولة — رصيدك بعد ٦٠ يوم</h2>
       <div id="radarBox"></div>
     </div>
@@ -500,12 +494,6 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <div class="grid2"><select id="stGap"><option value="0">الدخل مستمر</option><option value="1">يتوقف الدخل شهرًا</option><option value="2">يتوقف الدخل شهرين</option><option value="3">يتوقف الدخل ٣ أشهر</option></select><input id="stEmg" type="number" inputmode="decimal" placeholder="مصروف طارئ فوري (اختياري)"></div>
       <div class="grid2"><input id="stInf" type="number" inputmode="decimal" placeholder="نسبة غلاء المصروفات ٪ (اختياري)"><button class="btn" id="stRun">شغّل الاختبار</button></div>
       <div id="stOut" style="margin-top:8px"><p class="mut">اختبر صمود رصيدك أمام توقف الدخل والطوارئ والغلاء — محاكاة شهرًا بشهر حتى ٢٤ شهرًا.</p></div>
-    </div>
-<div class="card">
-      <h2 class="sec">🎨 بصمتك المالية — لوحة تُولد من بياناتك</h2>
-      <div style="text-align:center"><canvas id="fpCanvas" width="300" height="300" style="max-width:76vw;height:auto;border-radius:20px"></canvas></div>
-      <p class="mut" id="fpCap" style="text-align:center"></p>
-      <button class="btn" id="fpSave">تنزيل اللوحة (PNG)</button>
     </div>
   </div>
 </main>
@@ -562,7 +550,7 @@ let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
 let acctFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.zakat=s.zakat||{gold:0}; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring;t.mood=t.mood||''}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -1031,12 +1019,6 @@ function chalProgress(c){const startMs=Date.parse(c.start+'T00:00:00Z');const to
 function addChallenge(){const kind=$('chalKind').value;const days=parseInt($('chalDays').value)||7;const c={id:'c'+Date.now(),kind,days,start:todayStr(),cat:$('chalCat').value,cap:parseFloat($('chalCap').value)||0};if(kind==='catcap'&&!(c.cap>0)){toast('أدخل سقفًا صحيحًا لتحدّي الفئة');return}state.challenges.push(c);save();renderLab();toast('🔥 بدأ التحدّي — بالتوفيق!')}
 window.chalDel=id=>{state.challenges=state.challenges.filter(x=>x.id!==id);save();renderLab()};
 function moodStats(){const m={};state.tx.forEach(t=>{if(t.type!=='expense'||!t.mood)return;const e=m[t.mood]=m[t.mood]||{n:0,sum:0};e.n++;e.sum+=t.amount});return m}
-function fpSegments(){let src=monthTx().filter(t=>t.type==='expense');let label='هذا الشهر';if(!src.length){src=state.tx.filter(t=>t.type==='expense');label='كل حركاتك'}const by={};src.forEach(t=>by[t.cat]=(by[t.cat]||0)+t.amount);const tot=Object.values(by).reduce((s,v)=>s+v,0);if(!tot)return null;const cats=Object.keys(by).sort((a,b)=>by[b]-by[a]);return{segs:cats.map(c=>({cat:c,frac:by[c]/tot,color:COLORS[Math.max(0,CATS.expense.findIndex(x=>x[0]===c))%COLORS.length]})),label,tot}}
-function drawFP(){const cv=$('fpCanvas');if(!cv||!cv.getContext)return;const ctx=cv.getContext('2d');const C=150;try{ctx.clearRect(0,0,300,300)}catch(e){}
- const d=fpSegments();ctx.beginPath();ctx.arc(C,C,146,0,7);ctx.fillStyle='#F4F7F5';ctx.fill();
- if(!d){$('fpCap').textContent='أضف مصروفات أولًا وستُولد بصمتك هنا';return}
- let a=-Math.PI/2;d.segs.forEach(s=>{const sw=s.frac*Math.PI*2;for(let r=0;r<3;r++){ctx.beginPath();ctx.arc(C,C,136-r*27,a+0.02,a+Math.max(0.03,sw-0.02));ctx.strokeStyle=s.color;ctx.globalAlpha=1-r*0.22;ctx.lineWidth=17;ctx.stroke()}a+=sw});ctx.globalAlpha=1;ctx.beginPath();ctx.arc(C,C,50,0,7);ctx.fillStyle=d.segs[0].color;ctx.fill();ctx.fillStyle='#FFFFFF';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.fillText('💰',C,C+10);
- $('fpCap').textContent='بصمة '+d.label+' — تولّدت من '+d.segs.length+' فئات، بإجمالي '+fmt(d.tot)+' — لا توجد بصمتان متشابهتان لأي شخصين'}
 function renderLab(){
  /* wishes */
  const surplus=monthlyAvg('income')-monthlyAvg('expense');const perDay=surplus/30;
@@ -1066,12 +1048,11 @@ function renderLab(){
  if(entries.length){const maxSum=Math.max(...entries.map(([,e])=>e.sum));let ins='';const rich=entries.filter(([,e])=>e.n>=2);if(rich.length>=2){const hi=rich.reduce((a,b)=>b[1].sum/b[1].n>a[1].sum/a[1].n?b:a);const lo=rich.reduce((a,b)=>b[1].sum/b[1].n<a[1].sum/a[1].n?b:a);const ratio=(hi[1].sum/hi[1].n)/(lo[1].sum/lo[1].n);if(ratio>=1.3){const mn=k=>(MOODS.find(m=>m[0]===k)||[])[2]||k;ins='<p>🔍 نمط مكتشف: متوسط صرفك وأنت «'+mn(hi[0])+'» أعلى بـ <b>'+Math.round((ratio-1)*100)+'٪</b> من صرفك وأنت «'+mn(lo[0])+'».</p>'}}
   $('moodBox').innerHTML=ins+entries.sort((a,b)=>b[1].sum-a[1].sum).map(([k,e])=>{const md=MOODS.find(m=>m[0]===k)||['','😐',k];return '<div class="tx"><div class="mid"><div class="nm">'+md[1]+' '+md[2]+'</div><div class="ds">'+e.n+' حركة • المتوسط '+fmt(e.sum/e.n)+'</div></div><div class="am" style="color:var(--red)">'+fmt(e.sum)+'</div></div><div class="progress"><i style="width:'+Math.round(e.sum/maxSum*100)+'%"></i></div>'}).join('')}
  else{$('moodBox').innerHTML='<p class="mut">عند إضافة أي مصروف اختر مزاجك من الأزرار الجديدة في نافذة الإضافة، وبعد أيام سيكشف لك التطبيق كيف يحرّك مزاجُك محفظتَك — بيانات لا يجمعها أي تطبيق مصروفات عادةً.</p>'}
- drawFP(); renderDebts(); renderRadar(); renderRound();
+ renderDebts(); renderRadar(); renderRound();
 }
 $('wishAdd').onclick=addWish;
 $('chalAdd').onclick=addChallenge;
 $('workSave').onclick=()=>{state.work={salary:parseFloat($('workSalary').value)||0,dpm:parseInt($('workDpm').value)||22,hpd:parseInt($('workHpd').value)||8};save();renderLab();toast('⏱️ حُفظت إعدادات العمل')};
-$('fpSave').onclick=async()=>{const cv=$('fpCanvas');if(!cv)return;const url=cv.toDataURL('image/png');const BS=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.BackupSaver;if(BS){try{await BS.save({name:'my-fingerprint.png',content:url.split(',')[1],base64:true,mime:'image/png'});toast('✅ حُفظت اللوحة في المكان الذي اخترته')}catch(e){toast('أُلغي الحفظ')}return}const a=document.createElement('a');a.href=url;a.download='my-fingerprint.png';a.click();toast('🎨 تم تنزيل اللوحة')};
 $('fAmount').addEventListener('input',updateWorkHint);
 drawMoodChips();
 
@@ -1159,26 +1140,7 @@ function cumSeries(){const out=[];let run=0;for(let i=11;i>=0;i--){const d=month
 function renderCum(){const el=$('cumChart');if(!el)return;const s=cumSeries();const max=Math.max(...s.map(x=>Math.abs(x.cum)),1);
  el.innerHTML='<div class="chart">'+s.map((x,i)=>'<div class="col"><div class="cv">'+(x.cum?new Intl.NumberFormat('ar',{notation:'compact'}).format(x.cum):'')+'</div><div class="bar '+(i===s.length-1?'cur':'')+'" style="height:'+Math.max(3,Math.abs(x.cum)/max*95)+'px;'+(x.cum<0?'background:var(--red)':'')+'"></div><div class="cl">'+x.d.toLocaleDateString('ar',{month:'short'})+'</div></div>').join('')+'</div>'
  +'<p class="hintline">المنحنى = مجموع (الدخل − المصروفات) تراكميًا عبر آخر ١٢ شهرًا. ارتفاعه يعني أنك تدّخر فعليًا شهرًا بعد شهر.</p>'}
-function zakatCalc(){const balances=ACCOUNTS.reduce((s,a)=>s+accBalance(a[0]),0);
- const owedToYou=state.debts.filter(d=>d.dir==='owed').reduce((s,d)=>s+Math.max(0,d.total-d.paid),0);
- const youOwe=state.debts.filter(d=>d.dir==='owe').reduce((s,d)=>s+Math.max(0,d.total-d.paid),0);
- const gold=(state.zakat&&state.zakat.gold)||0;const nisab=85*gold;
- const base=Math.max(0,balances+owedToYou-youOwe);
- const due=(gold>0&&base>=nisab)?base*0.025:0;
- return{balances,owedToYou,youOwe,nisab,base,due,gold}}
-function renderZakat(){const el=$('zakatBox');if(!el)return;const z=zakatCalc();
- el.innerHTML='<div class="kv"><span>🏦 مجموع أرصدة حساباتك</span><b>'+fmt(z.balances)+'</b></div>'
- +'<div class="kv"><span>🤝 ديون لك عند الناس (متبقّية)</span><b>'+fmt(z.owedToYou)+'</b></div>'
- +'<div class="kv"><span>💳 ديون عليك (متبقّية)</span><b>− '+fmt(z.youOwe)+'</b></div>'
- +'<div class="kv"><span>💰 المال الخاضع للزكاة</span><b>'+fmt(z.base)+'</b></div>'
- +(z.gold>0?'<div class="kv"><span>⚖️ النصاب (٨٥ غرام ذهب)</span><b>'+fmt(z.nisab)+'</b></div>'
- +'<div style="text-align:center;padding:12px 0 4px"><div class="mut">زكاتك التقديرية (٢٫٥٪)</div><div style="font-size:29px;font-weight:800;color:var(--green)">'+(z.due>0?fmt(z.due):'لا زكاة بعد — لم يبلغ النصاب')+'</div></div>'
- :'<p class="hintline">أدخل سعر غرام الذهب الحالي بالأعلى لحساب النصاب والزكاة.</p>')
- +'<p class="hintline">حساب تقريبي لمساعدتك، مبني على أرصدة التطبيق وديونه المسجلة؛ للزكاة شروط (حولان الحول وملك النصاب) — تحقق من حالتك الخاصة مع أهل العلم.</p>';
- const gi=$('zkGold');if(gi&&document.activeElement!==gi)gi.value=z.gold||''}
 const __renderV10=render;render=function(){__renderV10();renderAcctFix();renderTransfers();renderMom();renderCum()};
-const __renderLabV10=renderLab;renderLab=function(){__renderLabV10();renderZakat()};
-const zkEl=$('zkGold');if(zkEl)zkEl.onchange=e=>{state.zakat=state.zakat||{gold:0};state.zakat.gold=parseFloat(e.target.value)||0;save();renderZakat();toast('🕌 حُفظ سعر الذهب')};
 
 </script>
 </body>
