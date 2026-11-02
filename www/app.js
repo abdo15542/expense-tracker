@@ -822,15 +822,23 @@ function renderStatementAll(){const M=$('stmtMonth').value||ym(new Date());const
  stmtCache='🧾 كشف كل الحسابات — '+M+'\nالرصيد الافتتاحي: '+fmt(data.opening)+'\n'+data.rows.map(r=>r.date+' • '+r.lab+' • '+(r.amount>=0?'+':'−')+fmt(Math.abs(r.amount))+' • الرصيد: '+fmt(r.bal)).join('\n')+'\nالرصيد الختامي: '+fmt(data.closing);
  $('stmtBox').innerHTML='<p>الافتتاحي: <b>'+fmt(data.opening)+'</b> • الختامي: <b>'+fmt(data.closing)+'</b> • '+data.count+' حركة (كل الحسابات)</p>'+(data.rows.length?data.rows.map(r=>'<div class="kv"><span>'+r.date+' • '+esc(r.lab)+' <span class="ds">('+esc(r.accName)+')</span></span><b style="color:'+(r.amount>=0?'var(--green)':'var(--red)')+'">'+(r.amount>=0?'+':'−')+fmt(Math.abs(r.amount))+'</b></div><div class="ds">الرصيد بعدها: '+fmt(r.bal)+'</div>').join(''):'<p class="mut">لا حركات في هذا الشهر.</p>')}
 const __rsV15=renderStatement;renderStatement=function(){if($('stmtAcct').value==='all')renderStatementAll();else __rsV15()};
+
+function buildPdfModel(d){
+ const tiles=[['الرصيد الافتتاحي',fmt(d.opening)],['إجمالي الدخل',fmt(d.incTotal)],['إجمالي المصروفات',fmt(d.expTotal)],['صافي الفترة',fmt(Math.round((d.incTotal-d.expTotal)*100)/100)],['الرصيد الختامي',fmt(d.closing)]];
+ const blocks=[];
+ if(d.byCatExp.length)blocks.push({h:'المصروفات حسب الفئة',head:['الفئة','عدد الحركات','المجموع','النسبة'],w:[2.2,1,1.3,0.8],rows:d.byCatExp.map(c=>[c.cat,String(c.n),fmt(c.sum),c.pct+'٪'])});
+ if(d.byCatInc.length)blocks.push({h:'الدخل حسب الفئة',head:['الفئة','عدد الحركات','المجموع','النسبة'],w:[2.2,1,1.3,0.8],rows:d.byCatInc.map(c=>[c.cat,String(c.n),fmt(c.sum),c.pct+'٪'])});
+ blocks.push({h:'جميع الحركات بالترتيب الزمني',head:['التاريخ','البيان','الحساب','المبلغ','الرصيد'],w:[1.15,2.6,1.1,1.15,1.15],colorCol:3,rows:d.rows.map(r=>[r.date+(r.time?'\n'+r.time:''),r.lab+(r.note&&r.type!=='transfer'?'\n'+r.note:''),r.accName,(r.amount>0?'+':(r.amount<0?'−':''))+fmt(Math.abs(r.amount)),fmt(r.bal)])});
+ return{title:'كشف حساب مفصّل — تتبّع المصروفات',sub:['النطاق: '+(d.scopeAll?'كل الحسابات':acctName(d.acct))+'  •  الفترة: '+(d.from?('من '+d.from+' إلى '+(d.to||'اليوم')):'كل الفترات منذ بداية الاستخدام'),'أُنشئ في '+new Date().toLocaleString('ar')+'  •  '+d.count+' حركة مشمولة'],tiles,blocks,foot:'وُثّق هذا الكشف من بيانات تطبيق تتبّع المصروفات على هاتفك فقط'}}
 async function exportPdf(){const acct=$('stmtAcct').value;const r=$('pdfRange').value;let from='',to='';const now=new Date();const M=ym(now);
  if(r==='month'){from=M+'-01';to=M+'-'+String(new Date(now.getFullYear(),now.getMonth()+1,0).getDate()).padStart(2,'0')}
  else if(r==='last'){const dd=new Date(now.getFullYear(),now.getMonth()-1,1);const lm=ym(dd);from=lm+'-01';to=lm+'-'+String(new Date(dd.getFullYear(),dd.getMonth()+1,0).getDate()).padStart(2,'0')}
  else if(r==='3m'){const dd=new Date(now.getFullYear(),now.getMonth()-2,1);from=ym(dd)+'-01';to=todayStr()}
  else if(r==='custom'){from=$('pdfFrom').value;to=$('pdfTo').value;if(!from||!to){toast('اختر تاريخي البداية والنهاية أولًا');return}}
  const data=buildStatementData(from,to,acct);if(!data.count){toast('لا حركات في هذا النطاق — جرّب نطاقًا أوسع');return}
- const html=renderStatementHtml(data);const BS=bsPlugin();
- if(BS&&BS.makePdf){try{await BS.makePdf({html,name:'كشف-حساب-مفصل.pdf'});toast('✅ حُفظ كشف الحساب PDF في المكان الذي اخترته')}catch(e){const m=(e&&e.message)||'';toast(m.indexOf('cancelled')>-1?'أُلغي الحفظ — لم يُحفَظ أي ملف':'⚠️ تعذّر إنشاء ملف PDF')}}
- else{const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();try{w.focus()}catch(e){}setTimeout(()=>{try{w.print()}catch(e){}},500)}else toast('تصدير PDF يعمل داخل التطبيق المثبّت')}}
+ const BS=bsPlugin();
+ if(BS&&BS.makePdfDoc){try{await BS.makePdfDoc({doc:JSON.stringify(buildPdfModel(data)),name:'كشف-حساب-مفصل.pdf'});toast('✅ حُفظ كشف الحساب PDF في المكان الذي اخترته')}catch(e){const m=(e&&e.message)||'';toast(m.indexOf('cancelled')>-1?'أُلغي الحفظ — لم يُحفَظ أي ملف':'⚠️ تعذّر إنشاء ملف PDF')}}
+ else{const html=renderStatementHtml(data);const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();try{w.focus()}catch(e){}setTimeout(()=>{try{w.print()}catch(e){}},500)}else toast('تصدير PDF يعمل داخل التطبيق المثبّت')}}
 $('pdfBtn').onclick=exportPdf;
 $('pdfRange').onchange=e=>{$('pdfDates').style.display=e.target.value==='custom'?'grid':'none'};
 
