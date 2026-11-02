@@ -604,7 +604,7 @@ async function pinHash(pin,salt){
 async function setPin(pin){const salt=lockSalt();state.lock={on:true,hash:await pinHash(pin,salt),salt,mins:(state.lock&&state.lock.mins!=null)?state.lock.mins:5,bio:!!(state.lock&&state.lock.bio),recHash:(state.lock&&state.lock.recHash)||'',recSalt:(state.lock&&state.lock.recSalt)||''};save()}
 async function checkPin(pin){if(!state.lock||!state.lock.hash)return false;return (await pinHash(pin,state.lock.salt))===state.lock.hash}
 function lockShow(mode,title,msg,onDone){lockMode=mode;lockBuf='';lockOnDone=onDone||null;
- $('lockScr').classList.add('on');$('lockTitle').textContent=title;$('lockMsg').textContent=msg;
+ shieldOff();$('lockScr').classList.add('on');$('lockTitle').textContent=title;$('lockMsg').textContent=msg;
  $('lockCancel').style.visibility=(mode==='unlock')?'hidden':'visible';drawLockDots();$('lockBioBtn').style.display=(mode==='unlock'&&state.lock&&state.lock.bio&&nbPlugin())?'block':'none';$('lockForgot').style.display=(mode==='unlock')?'block':'none';$('lockBioBtn').textContent='👆 فتح بالبصمة'}
 function lockHide(){$('lockScr').classList.remove('on');lockBuf='';lockOnDone=null}
 function drawLockDots(){const n=(lockMode==='recover')?12:LOCK_MAX;let h='';for(let i=0;i<n;i++)h+='<i class="'+(i<lockBuf.length?'f':'')+'"></i>';$('lockDots').innerHTML=h}
@@ -650,7 +650,7 @@ function renderLockSettings(){const el=$('lockState');if(!el)return;const on=!!(
  $('lockChangeBtn').style.display=on?'flex':'none';
  $('lockOffBtn').style.display=on?'flex':'none';
  const bb=$('lockBioSetBtn');if(bb){bb.style.display=on?'flex':'none';bb.textContent=(state.lock&&state.lock.bio)?'👆 إيقاف الفتح بالبصمة':'👆 تفعيل الفتح بالبصمة'};const rb=$('lockRecBtn');if(rb)rb.style.display=on?'flex':'none';if(on&&!state.lock.recHash)el.textContent+=' ⚠️ لا يوجد رمز استرداد بعد — أنشئه من الزر بالأسفل حتى لا تفقد بياناتك إن نسيت الرمز'}
-const __rmV11=renderMore;renderMore=function(){__rmV11();renderLockSettings()};
+const __rmV11=renderMore;renderMore=function(){__rmV11();renderLockSettings();syncSecure()};
 $('lockEnableBtn').onclick=lockSetup;
 $('lockChangeBtn').onclick=()=>lockShow('verify','تأكيد الرمز الحالي','أدخل رمزك الحالي أولًا',()=>lockSetup());
 $('lockOffBtn').onclick=()=>lockShow('verify','إيقاف القفل','أدخل رمزك لإيقاف القفل',()=>{state.lock={on:false,hash:'',salt:'',mins:5,bio:false};save();renderLockSettings();toast('🔓 أُوقف قفل التطبيق')});
@@ -661,12 +661,14 @@ $('lockBioSetBtn').onclick=()=>{const NB=nbPlugin();
  lockShow('verify','تفعيل البصمة','أدخل رمزك ثم اضغط ✓',async()=>{try{const av=await NB.isAvailable({useFallback:false});if(!av||!av.isAvailable){toast('لا توجد بصمة مفعّلة على هذا الهاتف — فعّلها من إعدادات الهاتف أولًا');return}
   await NB.verifyIdentity({reason:'ربط بصمتك بتطبيق المصروفات',title:'👆 تفعيل البصمة',subtitle:'تتبّع المصروفات',description:'المس مستشعر البصمة للتفعيل',negativeButtonText:'إلغاء'});
   state.lock.bio=true;save();renderLockSettings();toast('👆 تم تفعيل الفتح بالبصمة')}catch(e){toast('أُلغي تفعيل البصمة')}})};
-document.addEventListener('visibilitychange',()=>{if(document.hidden){lockHiddenAt=Date.now()}
- else if(lockHiddenAt&&state.lock&&state.lock.on&&state.lock.hash){const mins=(state.lock.mins!=null)?state.lock.mins:5;if(mins===0||Date.now()-lockHiddenAt>=mins*60000)lockNow();lockHiddenAt=0}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){lockHiddenAt=Date.now();if(state.lock&&state.lock.on&&state.lock.hash)shieldOn()}
+ else if(lockHiddenAt&&state.lock&&state.lock.on&&state.lock.hash){const mins=(state.lock.mins!=null)?state.lock.mins:5;if(mins===0||Date.now()-lockHiddenAt>=mins*60000)lockNow();else shieldOff();lockHiddenAt=0}});
 lockNow();
+if(!(state.lock&&state.lock.on&&state.lock.hash))shieldOff();
+syncSecure();
 
 let dataDirty=false, cameFromRecovery=false, abBusy=false;
-const __saveV13=save; save=function(){__saveV13(); dataDirty=true};
+const __saveV13=save; save=function(){__saveV13(); dataDirty=true; try{localStorage.setItem('abPending','1')}catch(e){} if(state&&state.autoBackup&&state.autoBackup.on){clearTimeout(window.__abTimer); window.__abTimer=setTimeout(()=>autoBackupTick(false),8000)}};
 function genRecoveryCode(){let code='';const need=12;
  if(window.crypto&&crypto.getRandomValues){const buf=new Uint8Array(64);let i=0;crypto.getRandomValues(buf);
   while(code.length<need){if(i>=buf.length){crypto.getRandomValues(buf);i=0}const b=buf[i++];if(b<250)code+=String(b%10)}}
@@ -682,13 +684,15 @@ function forgotPin(){
 $('lockForgot').onclick=forgotPin;
 $('lockRecBtn').onclick=()=>lockShow('verify','رمز الاسترداد','أدخل رمزك الحالي ثم اضغط ✓',async()=>{const c=await setRecoveryCode();showRecoveryCode(c);toast('🔑 جدّدت رمز الاسترداد — القديم لم يعد صالحًا')});
 function bsPlugin(){return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.BackupSaver)||null}
-function renderAutoBackup(){const el=$('abState');if(!el)return;const ab=state.autoBackup||{on:false,on2:0};
+function renderAutoBackup(){const el=$('abState');if(!el)return;const ab=state.autoBackup||{on:false};
  $('abOffBtn').style.display=ab.on?'flex':'none';
+ const nb=$('abNowBtn');if(nb)nb.style.display=ab.on?'flex':'none';
  $('abPickBtn').textContent=ab.on?'📁 تغيير ملف النسخ التلقائي':'📁 اختيار ملف وتفعيل النسخ التلقائي';
- if(!ab.on){el.textContent='⏸️ النسخ التلقائي غير مفعّل. فعّله واختر ملفًا مرة واحدة فقط، وبعدها تُحفَظ نسخة من بياناتك تلقائيًا كل ٥ دقائق عند وجود تغييرات — دون أن يُطلب منك أي إذن أو تأكيد';return}
- el.textContent='✅ النسخ التلقائي مفعّل ← '+(ab.name||'ملف النسخ')+(ab.last?(' • آخر نسخة ناجحة: '+new Date(ab.last).toLocaleString('ar',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'})):' • ستُحفَظ أول نسخة عند أول تغيير')}
-async function autoBackupTick(){if(abBusy)return;const ab=state.autoBackup;if(!ab||!ab.on||!dataDirty)return;const BS=bsPlugin();if(!BS||!BS.autoSave)return;abBusy=true;
- try{await BS.autoSave({content:JSON.stringify(state,null,2)});dataDirty=false;ab.last=Date.now();__saveV13();renderAutoBackup()}catch(e){}
+ if(!ab.on){el.textContent='⏸️ النسخ التلقائي غير مفعّل. فعّله واختر ملفًا مرة واحدة فقط، وبعدها تُحفَظ نسخة من بياناتك بعد ثوانٍ من أي تغيير، وكل ٥ دقائق، وعند فتح التطبيق إن بقيت نسخة معلّقة — دون أي إذن لاحق';return}
+ if(ab.err){el.textContent='⚠️ النسخ التلقائي مفعّل لكن آخر محاولة فشلت ('+(ab.err==='no_destination'?'لا يوجد ملف وجهة صالح':'تعذّرت الكتابة إلى الملف')+'). اضغط «💾 احفظ نسخة الآن» للتجربة، وإن تكرر الفشل غيّر الملف من الزر بالأسفل واختره داخل مجلد التنزيلات';return}
+ el.textContent='✅ النسخ التلقائي مفعّل ← '+(ab.name||'ملف النسخ')+(ab.last?(' • آخر نسخة ناجحة: '+new Date(ab.last).toLocaleString('ar',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'})):' • ستُحفَظ أول نسخة بعد ثوانٍ من أول تغيير')}
+async function autoBackupTick(force){if(abBusy)return;const ab=state.autoBackup;if(!ab||!ab.on)return;if(!force&&!dataDirty&&!pendingAb())return;const BS=bsPlugin();if(!BS||!BS.autoSave)return;abBusy=true;
+ try{await BS.autoSave({content:JSON.stringify(state,null,2)});dataDirty=false;clearPendingAb();ab.last=Date.now();ab.err='';__saveV13();renderAutoBackup()}catch(e){ab.err=((e&&e.message)||'write_failed');ab.errAt=Date.now();__saveV13();renderAutoBackup()}
  abBusy=false}
 $('abPickBtn').onclick=async()=>{const BS=bsPlugin();if(!BS||!BS.pickAutoFile){toast('النسخ التلقائي يعمل داخل التطبيق المثبّت على الهاتف');return}
  try{const r=await BS.pickAutoFile({name:'expenses-auto-backup.json'});state.autoBackup={on:true,name:(r&&r.name)||'expenses-auto-backup.json',last:(state.autoBackup&&state.autoBackup.last)||0};save();await autoBackupTick();renderAutoBackup();toast('✅ فُعّل النسخ التلقائي — لن يُسأل عن أي إذن بعد الآن')}catch(e){toast('أُلغي اختيار الملف — لم يُفعَّل النسخ التلقائي')}};
@@ -841,4 +845,12 @@ async function exportPdf(){const acct=$('stmtAcct').value;const r=$('pdfRange').
  else{const html=renderStatementHtml(data);const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();try{w.focus()}catch(e){}setTimeout(()=>{try{w.print()}catch(e){}},500)}else toast('تصدير PDF يعمل داخل التطبيق المثبّت')}}
 $('pdfBtn').onclick=exportPdf;
 $('pdfRange').onchange=e=>{$('pdfDates').style.display=e.target.value==='custom'?'grid':'none'};
+
+function shieldOn(){const sh=$('bootShield');if(sh)sh.classList.remove('off')}
+function shieldOff(){const sh=$('bootShield');if(sh)sh.classList.add('off')}
+function syncSecure(){try{const BS=bsPlugin();if(BS&&BS.setSecure)BS.setSecure({on:!!(state.lock&&state.lock.on&&state.lock.hash)}).catch(()=>{})}catch(e){}}
+function pendingAb(){try{return !!localStorage.getItem('abPending')}catch(e){return false}}
+function clearPendingAb(){try{localStorage.removeItem('abPending')}catch(e){}}
+$('abNowBtn').onclick=async()=>{const ab=state.autoBackup;if(!ab||!ab.on){toast('فعّل النسخ التلقائي واختر ملف الوجهة أولًا من الزر بالأعلى');return}toast('⏳ جارٍ حفظ نسخة احتياطية الآن...');await autoBackupTick(true);const a2=state.autoBackup;if(a2&&a2.err)toast(a2.err==='no_destination'?'⚠️ لم تُحفَظ: لا يوجد ملف وجهة صالح — غيّر الملف واختره من جديد':'⚠️ لم تُحفَظ النسخة: تعذّرت الكتابة إلى الملف — جرّب اختيار ملف داخل مجلد التنزيلات');else toast('✅ حُفظت نسخة احتياطية الآن بنجاح')};
+setTimeout(()=>{autoBackupTick(false)},3000);
 
