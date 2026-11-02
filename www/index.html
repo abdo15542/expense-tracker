@@ -217,6 +217,8 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
 .btn{min-height:50px;display:flex;align-items:center;justify-content:center}
 .card{box-shadow:0 3px 14px rgba(15,35,25,.05)}
 
+#recScr{position:fixed;inset:0;z-index:99998;background:linear-gradient(160deg,var(--hero1),var(--hero2));display:none;align-items:center;justify-content:center;padding:24px}
+#recScr.on{display:flex}
 #lockScr{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,var(--hero1),var(--hero2));display:none;align-items:center;justify-content:center;padding:24px}
 #lockScr.on{display:flex}
 .lockBox{width:100%;max-width:320px;text-align:center;color:#fff}
@@ -418,9 +420,10 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <button class="btn ghost" id="lockChangeBtn" style="margin-top:8px">تغيير الرمز</button>
       <button class="btn ghost" id="lockOffBtn" style="margin-top:8px">إيقاف القفل</button>
       <button class="btn ghost" id="lockBioSetBtn" style="margin-top:8px">👆 تفعيل الفتح بالبصمة</button>
+      <button class="btn ghost" id="lockRecBtn" style="margin-top:8px">🔑 إنشاء / تجديد رمز الاسترداد</button>
       <label class="fl" style="margin-top:12px;display:block">القفل التلقائي عند ترك التطبيق</label>
       <select class="fld" id="lockMins"><option value="0">فورًا</option><option value="1">بعد دقيقة</option><option value="5">بعد ٥ دقائق</option><option value="15">بعد ١٥ دقيقة</option><option value="30">بعد ٣٠ دقيقة</option></select>
-      <p class="hintline">يُحفَظ الرمز على جهازك بصيغة مشفّرة (بصمة SHA-256) ولا يغادر هاتفك أبدًا. إن نسيت الرمز فلا وسيلة لفتح التطبيق إلا مسح بياناته — اختر رمزًا لا تنساه واحفظه في مكان آمن.</p>
+      <p class="hintline">يُحفَظ الرمز على جهازك بصيغة مشفّرة (بصمة SHA-256) ولا يغادر هاتفك أبدًا. إن نسيت الرمز تستطيع استرداد الوصول برمز الاسترداد الذي يظهر لك عند التفعيل — اكتبه واحفظه خارج الهاتف.</p>
     </div>
     <div class="card">
       <h2 class="sec" style="margin-top:0">🎨 ثيمات المظهر <a id="themeReset">الافتراضي</a></h2>
@@ -458,9 +461,13 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <button class="btn ghost" id="exportJson">💾 تنزيل نسخة احتياطية (JSON)</button>
       <button class="btn ghost" id="importBtn">📥 استيراد نسخة احتياطية</button>
       <input type="file" id="importFile" accept="application/json" hidden>
+      <div style="border-top:1px dashed var(--line);margin:12px 0"></div>
+      <p class="mut" id="abState" style="margin-bottom:8px"></p>
+      <button class="btn ghost" id="abPickBtn">📁 اختيار ملف وتفعيل النسخ التلقائي</button>
+      <button class="btn ghost" id="abOffBtn" style="margin-top:8px;display:none">⏸️ إيقاف النسخ التلقائي</button>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.3<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.4<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -532,6 +539,14 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
   <div class="lockPad"><button onclick="lockKey('1')">1</button><button onclick="lockKey('2')">2</button><button onclick="lockKey('3')">3</button><button onclick="lockKey('4')">4</button><button onclick="lockKey('5')">5</button><button onclick="lockKey('6')">6</button><button onclick="lockKey('7')">7</button><button onclick="lockKey('8')">8</button><button onclick="lockKey('9')">9</button><button style="background:rgba(255,255,255,.3)" onclick="lockKey('enter')">✓</button><button onclick="lockKey('0')">0</button><button class="ghost" onclick="lockKey('back')">⌫</button></div>
   <button id="lockBioBtn" onclick="bioUnlock()" style="display:none;margin:18px auto 0;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:99px;padding:11px 24px;font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer">👆 فتح بالبصمة</button>
   <div style="margin-top:14px"><button id="lockCancel" onclick="lockKey('cancel')" style="background:none;border:none;color:#fff;opacity:.85;font-size:15px;font-family:inherit;cursor:pointer">إلغاء</button></div>
+  <div style="margin-top:6px"><button id="lockForgot" style="background:none;border:none;color:#fff;opacity:.8;font-size:14px;font-family:inherit;cursor:pointer;text-decoration:underline">نسيت الرمز؟</button></div>
+</div></div>
+<div id="recScr"><div class="lockBox">
+  <div style="font-size:46px">🔑</div>
+  <div style="font-size:19px;font-weight:800">رمز الاسترداد الخاص بك</div>
+  <p class="lockMsg" style="margin-top:8px">هذا مفتاحك الوحيد إن نسيت رمز القفل. اكتبه على ورقة أو احفظه في مكان آمن خارج الهاتف — لن يظهر مرة أخرى.</p>
+  <div id="recCode" style="font-size:29px;font-weight:800;letter-spacing:2px;background:rgba(255,255,255,.14);border:1.5px dashed rgba(255,255,255,.55);border-radius:14px;padding:14px 8px;margin:16px 0;direction:ltr"></div>
+  <button id="recDone" style="background:#fff;color:#14532D;border:none;border-radius:14px;min-height:50px;width:100%;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer">لقد حفظته في مكان آمن ✓</button>
 </div></div>
 <nav>
   <button data-go="home" class="on"><span class="ni">🏠</span>الرئيسية</button>
