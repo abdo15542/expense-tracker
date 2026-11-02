@@ -12,6 +12,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.pdf.PdfDocument;
 import android.provider.OpenableColumns;
+import android.view.WindowManager;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextDirectionHeuristics;
@@ -40,6 +41,7 @@ public class BackupSaverPlugin extends Plugin {
     private static final String PREFS = "auto_backup";
     private static final String KEY_URI = "uri";
     private static final String KEY_NAME = "name";
+    private static final String KEY_SECURE = "secure";
 
     @PluginMethod
     public void save(PluginCall call) {
@@ -147,6 +149,24 @@ public class BackupSaverPlugin extends Plugin {
         ret.put("hasFile", uriStr != null);
         ret.put("name", sp.getString(KEY_NAME, ""));
         call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void setSecure(PluginCall call) {
+        boolean on = Boolean.TRUE.equals(call.getBoolean("on", false));
+        SharedPreferences sp = getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        sp.edit().putBoolean(KEY_SECURE, on).apply();
+        Activity act = getActivity();
+        if (act != null) {
+            act.runOnUiThread(() -> {
+                if (on) {
+                    act.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                } else {
+                    act.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                }
+            });
+        }
+        call.resolve();
     }
 
     private String pendingDoc = null;
