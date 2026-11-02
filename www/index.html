@@ -221,6 +221,8 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
 #recScr.on{display:flex}
 #lockScr{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,var(--hero1),var(--hero2));display:none;align-items:center;justify-content:center;padding:24px}
 #lockScr.on{display:flex}
+#bootShield{position:fixed;inset:0;z-index:100002;background:linear-gradient(160deg,var(--hero1),var(--hero2));display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;text-align:center;padding:24px}
+#bootShield.off{display:none}
 .lockBox{width:100%;max-width:320px;text-align:center;color:#fff}
 .lockDots{display:flex;gap:9px;justify-content:center;margin:20px 0 8px}
 .lockDots i{width:12px;height:12px;border-radius:50%;border:2px solid #fff}
@@ -235,6 +237,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
 </style>
 </head>
 <body>
+<div id="bootShield"><div style="font-size:54px">🔒</div><div style="font-size:19px;font-weight:800">تتبّع المصروفات</div><div style="font-size:12.5px;opacity:.85">جارٍ التحقق من القفل...</div></div>
 
 <header class="hero">
   <div class="top">
@@ -485,10 +488,11 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <div style="border-top:1px dashed var(--line);margin:12px 0"></div>
       <p class="mut" id="abState" style="margin-bottom:8px"></p>
       <button class="btn ghost" id="abPickBtn">📁 اختيار ملف وتفعيل النسخ التلقائي</button>
+      <button class="btn ghost" id="abNowBtn" style="margin-top:8px;display:none">💾 احفظ نسخة احتياطية الآن</button>
       <button class="btn ghost" id="abOffBtn" style="margin-top:8px;display:none">⏸️ إيقاف النسخ التلقائي</button>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 11.2<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 11.3<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
