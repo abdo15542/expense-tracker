@@ -9,7 +9,7 @@ let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
 let acctFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.lock=s.lock||{on:false,hash:'',salt:'',mins:5,bio:false}; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.lock=s.lock||{on:false,hash:'',salt:'',mins:5,bio:false}; s.autoBackup=s.autoBackup||{on:false,name:'',last:0}; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring;t.mood=t.mood||''}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -601,27 +601,36 @@ function lockSalt(){let s='';const c='abcdef0123456789';for(let i=0;i<16;i++)s+=
 async function pinHash(pin,salt){
  if(window.crypto&&crypto.subtle&&crypto.subtle.digest){try{const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));return 's256:'+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){}}
  let h1=5381,h2=52711;const s=salt+':'+pin;for(let i=0;i<s.length;i++){const ch=s.charCodeAt(i);h1=((h1*33)^ch)>>>0;h2=((h2*31)+ch)>>>0}return 'h1:'+h1.toString(16)+'.'+h2.toString(16)}
-async function setPin(pin){const salt=lockSalt();state.lock={on:true,hash:await pinHash(pin,salt),salt,mins:(state.lock&&state.lock.mins!=null)?state.lock.mins:5,bio:!!(state.lock&&state.lock.bio)};save()}
+async function setPin(pin){const salt=lockSalt();state.lock={on:true,hash:await pinHash(pin,salt),salt,mins:(state.lock&&state.lock.mins!=null)?state.lock.mins:5,bio:!!(state.lock&&state.lock.bio),recHash:(state.lock&&state.lock.recHash)||'',recSalt:(state.lock&&state.lock.recSalt)||''};save()}
 async function checkPin(pin){if(!state.lock||!state.lock.hash)return false;return (await pinHash(pin,state.lock.salt))===state.lock.hash}
 function lockShow(mode,title,msg,onDone){lockMode=mode;lockBuf='';lockOnDone=onDone||null;
  $('lockScr').classList.add('on');$('lockTitle').textContent=title;$('lockMsg').textContent=msg;
- $('lockCancel').style.visibility=(mode==='unlock')?'hidden':'visible';drawLockDots();$('lockBioBtn').style.display=(mode==='unlock'&&state.lock&&state.lock.bio&&nbPlugin())?'block':'none'}
+ $('lockCancel').style.visibility=(mode==='unlock')?'hidden':'visible';drawLockDots();$('lockBioBtn').style.display=(mode==='unlock'&&state.lock&&state.lock.bio&&nbPlugin())?'block':'none';$('lockForgot').style.display=(mode==='unlock')?'block':'none';$('lockBioBtn').textContent='👆 فتح بالبصمة'}
 function lockHide(){$('lockScr').classList.remove('on');lockBuf='';lockOnDone=null}
-function drawLockDots(){let h='';for(let i=0;i<LOCK_MAX;i++)h+='<i class="'+(i<lockBuf.length?'f':'')+'"></i>';$('lockDots').innerHTML=h}
+function drawLockDots(){const n=(lockMode==='recover')?12:LOCK_MAX;let h='';for(let i=0;i<n;i++)h+='<i class="'+(i<lockBuf.length?'f':'')+'"></i>';$('lockDots').innerHTML=h}
 function shakeLock(msg){$('lockMsg').textContent=msg;const b=document.querySelector('.lockBox');if(b){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')}}
 async function lockKey(k){
- if(k==='cancel'){lockHide();return}
+ if(k==='cancel'){if(lockMode==='recover'||cameFromRecovery){cameFromRecovery=false;lockShow('unlock','🔒 التطبيق مقفل','أدخل رمزك ثم اضغط ✓ — أو استخدم بصمتك')}else lockHide();return}
  if(k==='back'){lockBuf=lockBuf.slice(0,-1);drawLockDots();return}
  if(Date.now()<lockWaitUntil)return;
- if(k==='enter'){if(lockBuf.length>=LOCK_MIN)await lockSubmit();return}
- if(lockBuf.length>=LOCK_MAX)return;
+ if(k==='enter'){const need=(lockMode==='recover')?12:LOCK_MIN;if(lockBuf.length>=need)await lockSubmit();return}
+ const cap=(lockMode==='recover')?12:LOCK_MAX;
+ if(lockBuf.length>=cap)return;
  lockBuf+=k;drawLockDots()}
 async function lockSubmit(){
  const pin=lockBuf;
  if(lockMode==='setup1'){lockFirst=pin;lockBuf='';drawLockDots();lockMode='setup2';$('lockTitle').textContent='تأكيد الرمز';$('lockMsg').textContent='أعد إدخال الرمز نفسه ثم اضغط ✓';return}
  if(lockMode==='setup2'){
-  if(pin===lockFirst){await setPin(pin);lockHide();renderLockSettings();toast('🔒 تم تفعيل قفل التطبيق')}
+  if(pin===lockFirst){await setPin(pin);lockHide();renderLockSettings();toast('🔒 تم تفعيل قفل التطبيق');if(cameFromRecovery||!state.lock.recHash){cameFromRecovery=false;const rc=await setRecoveryCode();showRecoveryCode(rc)}}
   else{lockBuf='';drawLockDots();lockMode='setup1';$('lockTitle').textContent='تعيين رمز القفل';shakeLock('الرمزان غير متطابقين — اختر رمزًا من جديد')}
+  return}
+ if(lockMode==='recover'){
+  if(!state.lock.recHash){shakeLock('لا يوجد رمز استرداد محفوظ — استخدم بصمتك بالأعلى');lockBuf='';drawLockDots();return}
+  const okR=(await pinHash(pin,state.lock.recSalt))===state.lock.recHash;
+  if(okR){cameFromRecovery=true;lockBuf='';lockMode='setup1';drawLockDots();$('lockTitle').textContent='اختر رمزًا جديدًا';$('lockMsg').textContent='تم التحقق من رمز الاسترداد — اختر رمز قفل جديدًا ثم اضغط ✓';$('lockBioBtn').style.display='none';$('lockForgot').style.display='none'}
+  else{lockFails++;lockBuf='';drawLockDots();
+   if(lockFails>=5){lockWaitUntil=Date.now()+30000;lockFails=0;shakeLock('محاولات كثيرة خاطئة — انتظر ٣٠ ثانية')}
+   else shakeLock('رمز الاسترداد غير صحيح — حاول مجددًا')}
   return}
  const ok=await checkPin(pin);
  if(ok){const cb=lockOnDone;lockHide();lockFails=0;if(cb)cb();else toast('🔓 مرحبًا بعودتك')}
@@ -630,7 +639,7 @@ async function lockSubmit(){
   else shakeLock('رمز غير صحيح — حاول مجددًا')}}
 function nbPlugin(){return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeBiometric)||null}
 async function bioUnlock(){const NB=nbPlugin();if(!NB)return;
- try{await NB.verifyIdentity({reason:'فتح تطبيق تتبّع المصروفات',title:'🔓 فتح بالبصمة',subtitle:'تتبّع المصروفات',description:'المس مستشعر البصمة للفتح',negativeButtonText:'إلغاء',maxAttempts:3});lockHide();lockFails=0;toast('🔓 مرحبًا بعودتك')}
+ try{await NB.verifyIdentity({reason:'فتح تطبيق تتبّع المصروفات',title:'🔓 فتح بالبصمة',subtitle:'تتبّع المصروفات',description:'المس مستشعر البصمة للفتح',negativeButtonText:'إلغاء',maxAttempts:3});if(lockMode==='recover'){cameFromRecovery=true;lockMode='setup1';lockBuf='';drawLockDots();$('lockTitle').textContent='اختر رمزًا جديدًا';$('lockMsg').textContent='تم التحقق ببصمتك — اختر رمز قفل جديدًا ثم اضغط ✓';$('lockBioBtn').style.display='none';$('lockForgot').style.display='none';return}lockHide();lockFails=0;toast('🔓 مرحبًا بعودتك')}
  catch(e){}}
 function lockNow(){if(state.lock&&state.lock.on&&state.lock.hash){lockShow('unlock','🔒 التطبيق مقفل','أدخل رمزك ثم اضغط ✓ — أو استخدم بصمتك');if(state.lock.bio)setTimeout(()=>{if($('lockScr').classList.contains('on')&&lockMode==='unlock')bioUnlock()},400)}}
 function lockSetup(){lockShow('setup1','تعيين رمز القفل','اختر رمزًا من ٤ إلى ٨ أرقام ثم اضغط ✓ — كلما طال صعُب فتحه. احفظه جيدًا: لا يمكن استرجاع البيانات بدونه')}
@@ -640,7 +649,7 @@ function renderLockSettings(){const el=$('lockState');if(!el)return;const on=!!(
  $('lockEnableBtn').style.display=on?'none':'flex';
  $('lockChangeBtn').style.display=on?'flex':'none';
  $('lockOffBtn').style.display=on?'flex':'none';
- const bb=$('lockBioSetBtn');if(bb){bb.style.display=on?'flex':'none';bb.textContent=(state.lock&&state.lock.bio)?'👆 إيقاف الفتح بالبصمة':'👆 تفعيل الفتح بالبصمة'}}
+ const bb=$('lockBioSetBtn');if(bb){bb.style.display=on?'flex':'none';bb.textContent=(state.lock&&state.lock.bio)?'👆 إيقاف الفتح بالبصمة':'👆 تفعيل الفتح بالبصمة'};const rb=$('lockRecBtn');if(rb)rb.style.display=on?'flex':'none';if(on&&!state.lock.recHash)el.textContent+=' ⚠️ لا يوجد رمز استرداد بعد — أنشئه من الزر بالأسفل حتى لا تفقد بياناتك إن نسيت الرمز'}
 const __rmV11=renderMore;renderMore=function(){__rmV11();renderLockSettings()};
 $('lockEnableBtn').onclick=lockSetup;
 $('lockChangeBtn').onclick=()=>lockShow('verify','تأكيد الرمز الحالي','أدخل رمزك الحالي أولًا',()=>lockSetup());
@@ -656,3 +665,34 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){lockHidden
  else if(lockHiddenAt&&state.lock&&state.lock.on&&state.lock.hash){const mins=(state.lock.mins!=null)?state.lock.mins:5;if(mins===0||Date.now()-lockHiddenAt>=mins*60000)lockNow();lockHiddenAt=0}});
 lockNow();
 
+let dataDirty=false, cameFromRecovery=false, abBusy=false;
+const __saveV13=save; save=function(){__saveV13(); dataDirty=true};
+function genRecoveryCode(){let code='';const need=12;
+ if(window.crypto&&crypto.getRandomValues){const buf=new Uint8Array(64);let i=0;crypto.getRandomValues(buf);
+  while(code.length<need){if(i>=buf.length){crypto.getRandomValues(buf);i=0}const b=buf[i++];if(b<250)code+=String(b%10)}}
+ else{while(code.length<need)code+=String(Math.floor(Math.random()*10))}
+ return code}
+async function setRecoveryCode(){const code=genRecoveryCode();const salt=lockSalt();state.lock.recHash=await pinHash(code,salt);state.lock.recSalt=salt;__saveV13();return code}
+function showRecoveryCode(code){$('recCode').textContent=code.replace(/(\d{4})(\d{4})(\d{4})/,'$1-$2-$3');$('recScr').classList.add('on')}
+$('recDone').onclick=()=>{$('recScr').classList.remove('on');toast('🔑 احتفظ برمز الاسترداد في مكان آمن خارج الهاتف')};
+function forgotPin(){
+ if(state.lock&&state.lock.recHash){lockMode='recover';lockBuf='';drawLockDots();$('lockTitle').textContent='🔑 استرداد الوصول';$('lockMsg').textContent='أدخل رمز الاسترداد (١٢ رقمًا) الذي حفظته عند تفعيل القفل، ثم اضغط ✓';$('lockCancel').style.visibility='visible';$('lockForgot').style.display='none';const bb=$('lockBioBtn');if(state.lock.bio&&nbPlugin()){bb.style.display='block';bb.textContent='👆 إعادة تعيين الرمز بالبصمة'}else bb.style.display='none'}
+ else if(state.lock&&state.lock.bio&&nbPlugin()){lockMode='recover';lockBuf='';drawLockDots();$('lockTitle').textContent='🔑 استرداد الوصول';$('lockMsg').textContent='لا يوجد رمز استرداد محفوظ — استخدم بصمتك لإعادة تعيين الرمز';$('lockCancel').style.visibility='visible';$('lockForgot').style.display='none';const bb=$('lockBioBtn');bb.style.display='block';bb.textContent='👆 إعادة تعيين الرمز بالبصمة'}
+ else shakeLock('لا يوجد رمز استرداد ولا بصمة مفعّلة. الحل الوحيد: إعدادات الهاتف ← التطبيقات ← تتبّع المصروفات ← مسح البيانات، ثم استيراد نسختك الاحتياطية')}
+$('lockForgot').onclick=forgotPin;
+$('lockRecBtn').onclick=()=>lockShow('verify','رمز الاسترداد','أدخل رمزك الحالي ثم اضغط ✓',async()=>{const c=await setRecoveryCode();showRecoveryCode(c);toast('🔑 جدّدت رمز الاسترداد — القديم لم يعد صالحًا')});
+function bsPlugin(){return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.BackupSaver)||null}
+function renderAutoBackup(){const el=$('abState');if(!el)return;const ab=state.autoBackup||{on:false,on2:0};
+ $('abOffBtn').style.display=ab.on?'flex':'none';
+ $('abPickBtn').textContent=ab.on?'📁 تغيير ملف النسخ التلقائي':'📁 اختيار ملف وتفعيل النسخ التلقائي';
+ if(!ab.on){el.textContent='⏸️ النسخ التلقائي غير مفعّل. فعّله واختر ملفًا مرة واحدة فقط، وبعدها تُحفَظ نسخة من بياناتك تلقائيًا كل ٥ دقائق عند وجود تغييرات — دون أن يُطلب منك أي إذن أو تأكيد';return}
+ el.textContent='✅ النسخ التلقائي مفعّل ← '+(ab.name||'ملف النسخ')+(ab.last?(' • آخر نسخة ناجحة: '+new Date(ab.last).toLocaleString('ar',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'})):' • ستُحفَظ أول نسخة عند أول تغيير')}
+async function autoBackupTick(){if(abBusy)return;const ab=state.autoBackup;if(!ab||!ab.on||!dataDirty)return;const BS=bsPlugin();if(!BS||!BS.autoSave)return;abBusy=true;
+ try{await BS.autoSave({content:JSON.stringify(state,null,2)});dataDirty=false;ab.last=Date.now();__saveV13();renderAutoBackup()}catch(e){}
+ abBusy=false}
+$('abPickBtn').onclick=async()=>{const BS=bsPlugin();if(!BS||!BS.pickAutoFile){toast('النسخ التلقائي يعمل داخل التطبيق المثبّت على الهاتف');return}
+ try{const r=await BS.pickAutoFile({name:'expenses-auto-backup.json'});state.autoBackup={on:true,name:(r&&r.name)||'expenses-auto-backup.json',last:(state.autoBackup&&state.autoBackup.last)||0};save();await autoBackupTick();renderAutoBackup();toast('✅ فُعّل النسخ التلقائي — لن يُسأل عن أي إذن بعد الآن')}catch(e){toast('أُلغي اختيار الملف — لم يُفعَّل النسخ التلقائي')}};
+$('abOffBtn').onclick=()=>{state.autoBackup={on:false,name:'',last:0};save();renderAutoBackup();toast('⏸️ أُوقف النسخ التلقائي')};
+setInterval(autoBackupTick,5*60*1000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)autoBackupTick()});
+renderAutoBackup();
