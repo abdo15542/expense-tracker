@@ -273,6 +273,10 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
         <div id="safeBox"></div>
       </div>
       <div class="card">
+        <h2 class="sec" style="margin-top:0">📅 التزاماتك القادمة — ٣٠ يومًا</h2>
+        <div id="commitBox"></div>
+      </div>
+      <div class="card">
         <h2 class="sec" style="margin-top:0">ميزانية الشهر <a data-go="more">تعديل</a></h2>
         <div class="progress"><i id="budgetBar" style="width:0%"></i></div>
         <div class="rowb"><span id="budgetSpent">—</span><b id="budgetPct">—</b></div>
@@ -368,6 +372,17 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
     <div class="card">
       <h2 class="sec" style="margin-top:0">📊 تصنيفاتك مقارنة بالشهر الماضي</h2>
       <div id="momCats"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec" style="margin-top:0">💎 صافي ثروتك</h2>
+      <div id="nwBox"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec" style="margin-top:0">🧾 كشف حساب</h2>
+      <div class="grid2"><select class="fld" id="stmtAcct"><option value="cash">💵 نقدي</option><option value="bank">🏦 بنك</option><option value="wallet">📱 محفظة إلكترونية</option></select><input class="fld" type="month" id="stmtMonth"></div>
+      <button class="btn" id="stmtGo" style="margin-top:8px">عرض الكشف</button>
+      <div id="stmtBox" style="margin-top:10px"></div>
+      <button class="btn ghost" id="stmtShare" style="margin-top:8px">📤 مشاركة الكشف نصيًا</button>
     </div>
         <div class="card">
       <h2 class="sec" style="margin-top:0">🏦 حساباتي والتحويل بينها</h2>
@@ -467,7 +482,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <button class="btn ghost" id="abOffBtn" style="margin-top:8px;display:none">⏸️ إيقاف النسخ التلقائي</button>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.4<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 11.0<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -525,6 +540,23 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <div class="grid2"><select id="stGap"><option value="0">الدخل مستمر</option><option value="1">يتوقف الدخل شهرًا</option><option value="2">يتوقف الدخل شهرين</option><option value="3">يتوقف الدخل ٣ أشهر</option></select><input id="stEmg" type="number" inputmode="decimal" placeholder="مصروف طارئ فوري (اختياري)"></div>
       <div class="grid2"><input id="stInf" type="number" inputmode="decimal" placeholder="نسبة غلاء المصروفات ٪ (اختياري)"><button class="btn" id="stRun">شغّل الاختبار</button></div>
       <div id="stOut" style="margin-top:8px"><p class="mut">اختبر صمود رصيدك أمام توقف الدخل والطوارئ والغلاء — محاكاة شهرًا بشهر حتى ٢٤ شهرًا.</p></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">💳 أقساطي — تتبّع الشراء بالتقسيط</h2>
+      <div id="instBox"></div>
+      <input class="fld" id="instName" placeholder="اسم السلعة: هاتف، ثلاجة، سيارة...">
+      <div class="grid2"><input id="instTotal" type="number" min="0" step="any" placeholder="السعر الكلي"><input id="instDown" type="number" min="0" step="any" placeholder="الدفعة الأولى (اختياري)"></div>
+      <div class="grid2"><input id="instN" type="number" min="1" step="1" placeholder="عدد الأقساط"><input id="instStart" type="date"></div>
+      <div class="grid2"><select id="instAcct"><option value="cash">💵 نقدي</option><option value="bank">🏦 بنك</option><option value="wallet">📱 محفظة إلكترونية</option></select><select id="instCat"></select></div>
+      <label class="check"><input type="checkbox" id="instDownTx" checked> تسجيل الدفعة الأولى كمصروف الآن</label>
+      <button class="btn" id="instAdd" style="margin-top:8px">أضف خطة الأقساط</button>
+    </div>
+    <div class="card">
+      <h2 class="sec">🧮 تقسيم مصروف مع آخرين</h2>
+      <p class="mut">اختر مصروفًا دفعتَه عن مجموعة، فيُحسَب نصيب كل شخص بالتساوي ويُسجَّل تلقائيًا كدَين لك عنده في قسم الديون بالأعلى.</p>
+      <select class="fld" id="splitTx" style="margin-top:8px"></select>
+      <input class="fld" id="splitNames" placeholder="الأسماء مفصولة بفاصلة: أحمد، سالم">
+      <button class="btn" id="splitGo" style="margin-top:8px">قسّم وسجّل الأنصبة كديون</button>
     </div>
   </div>
 </main>
