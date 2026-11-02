@@ -6,7 +6,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.graphics.Canvas;
+import android.graphics.pdf.PdfDocument;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.OpenableColumns;
+import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.activity.result.ActivityResult;
 
@@ -136,6 +143,119 @@ public class BackupSaverPlugin extends Plugin {
         ret.put("hasFile", uriStr != null);
         ret.put("name", sp.getString(KEY_NAME, ""));
         call.resolve(ret);
+    }
+
+    private String pendingHtml = null;
+    private WebView pdfWebView = null;
+
+    @PluginMethod
+    public void makePdf(PluginCall call) {
+        pendingHtml = call.getString("html", "");
+        String name = call.getString("name", "statement.pdf");
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/pdf");
+        intent.putExtra(Intent.EXTRA_TITLE, name);
+        startActivityForResult(call, intent, "pdfResult");
+    }
+
+    @ActivityCallback
+    private void pdfResult(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) {
+            call.reject("cancelled");
+            return;
+        }
+        Uri uri = result.getData().getData();
+        final String html = pendingHtml != null ? pendingHtml : "";
+        new Handler(Looper.getMainLooper()).post(() -> {
+            try {
+                Context ctx = getActivity() != null ? getActivity() : getContext();
+                WebView wv = new WebView(ctx);
+                pdfWebView = wv;
+                wv.getSettings().setJavaScriptEnabled(false);
+                wv.setBackgroundColor(0xFFFFFFFF);
+                wv.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public void onPageFinished(WebView view, String url) {
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> writePdf(view, uri, call), 400);
+                    }
+                });
+                wv.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+            } catch (Exception e) {
+                cleanupPdf();
+                call.reject("write_failed");
+            }
+        });
+    }
+
+    private void writePdf(WebView view, Uri uri, PluginCall call) {
+        PdfDocument doc = null;
+        try {
+            final int pageW = 595;
+            final int pageH = 842;
+            view.measure(
+                    View.MeasureSpec.makeMeasureSpec(pageW, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            int contentH = view.getMeasuredHeight();
+            if (contentH <= 0) contentH = (int) Math.ceil(view.getContentHeight() * view.getScale());
+            if (contentH <= 0) contentH = pageH;
+            view.layout(0, 0, pageW, contentH);
+            doc = new PdfDocument();
+            int pages = (int) Math.ceil((double) contentH / pageH);
+            if (pages < 1) pages = 1;
+            if (pages > 200) pages = 200;
+            for (int i = 0; i < pages; i++) {
+                PdfDocument.PageInfo info = new PdfDocument.PageInfo.Builder(pageW, pageH, i).create();
+                PdfDocument.Page page = doc.startPage(info);
+                Canvas canvas = page.getCanvas();
+                canvas.save();
+                canvas.translate(0, -i * pageH);
+                canvas.clipRect(0, i * pageH, pageW, Math.min((i + 1) * pageH, contentH));
+                view.draw(canvas);
+                canvas.restore();
+                doc.finishPage(page);
+            }
+            OutputStream os = getContext().getContentResolver().openOutputStream(uri, "wt");
+            if (os == null) {
+                doc.close();
+                cleanupPdf();
+                call.reject("write_failed");
+                return;
+            }
+            try {
+                doc.writeTo(os);
+            } finally {
+                try {
+                    os.close();
+                } catch (Exception ignored) {
+                }
+            }
+            doc.close();
+            cleanupPdf();
+            JSObject ret = new JSObject();
+            ret.put("saved", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            if (doc != null) {
+                try {
+                    doc.close();
+                } catch (Exception ignored) {
+                }
+            }
+            cleanupPdf();
+            call.reject("write_failed");
+        }
+    }
+
+    private void cleanupPdf() {
+        if (pdfWebView != null) {
+            try {
+                pdfWebView.destroy();
+            } catch (Exception ignored) {
+            }
+            pdfWebView = null;
+        }
     }
 
     private String displayName(Uri uri) {
