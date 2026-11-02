@@ -16,5 +16,13 @@ public class MainActivity extends BridgeActivity {
             }
         } catch (Exception ignored) {
         }
+        try {
+            android.webkit.WebView wv = getBridge().getWebView();
+            if (wv != null) {
+                wv.setLongClickable(false);
+                wv.setOnLongClickListener(v -> true);
+            }
+        } catch (Exception ignored) {
+        }
     }
 }
