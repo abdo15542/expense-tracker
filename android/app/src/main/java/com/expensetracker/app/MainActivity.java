@@ -9,5 +9,12 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(BackupSaverPlugin.class);
         super.onCreate(savedInstanceState);
+        try {
+            android.content.SharedPreferences sp = getSharedPreferences("auto_backup", MODE_PRIVATE);
+            if (sp.getBoolean("secure", false)) {
+                getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+            }
+        } catch (Exception ignored) {
+        }
     }
 }
