@@ -129,7 +129,7 @@ select.fld{appearance:none}
 .rangebox label{font-size:11.5px;color:var(--mut);font-weight:700;display:block;margin-bottom:4px}
 .goal .mini .v{font-size:15px}
 .goal .mini .t{font-size:11.5px}
-/* ===== smart v4 ===== */
+
 .quick{display:flex;gap:8px}
 .quick input{flex:1;padding:13px 14px;border:1.5px solid var(--line);border-radius:14px;font-size:14px;background:var(--field);min-width:0}
 .quick input:focus{outline:0;border-color:var(--green)}
@@ -158,7 +158,7 @@ body.dark .factor .bar2{background:#223129}
 .badge .bd{font-size:10.5px;color:var(--mut);margin-top:2px;line-height:1.6}
 .badge.lock{opacity:.38;filter:grayscale(1)}
 input[type=range]{width:100%;accent-color:var(--green)}
-/* ===== responsive hardening v4.1 ===== */
+
 html,body{overflow-x:hidden;max-width:100%}
 img,svg{max-width:100%}
 .card,.mini,.acct,.badge,.rc{min-width:0}
@@ -183,7 +183,7 @@ img,svg{max-width:100%}
  .tx .ic{width:40px;height:40px}
  .insight{font-size:12.8px}
 }
-/* ===== themes v5 ===== */
+
 .themes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .theme{border:2px solid var(--line);border-radius:16px;padding:9px;background:var(--field);text-align:right;position:relative;min-width:0}
 .theme .prev{height:36px;border-radius:10px;margin-bottom:8px;border:1px solid rgba(0,0,0,.06)}
@@ -209,7 +209,6 @@ h3.subh{font-size:13.5px;margin:14px 2px 9px;font-weight:800}
 .rule3 .rv{font-size:15px;font-weight:900;margin-top:3px}
 .rule3 .rt{font-size:11px;color:var(--mut)}
 
-/* ===== PRO FIELDS v8.2 — unified professional boxes ===== */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid2>*{min-width:0}
 input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{width:100%;box-sizing:border-box;flex:none;background:var(--field);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--ink);min-height:50px;height:50px}
@@ -217,6 +216,20 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
 .btn{min-height:50px;display:flex;align-items:center;justify-content:center}
 .card{box-shadow:0 3px 14px rgba(15,35,25,.05)}
+
+#lockScr{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,var(--hero1),var(--hero2));display:none;align-items:center;justify-content:center;padding:24px}
+#lockScr.on{display:flex}
+.lockBox{width:100%;max-width:320px;text-align:center;color:#fff}
+.lockDots{display:flex;gap:14px;justify-content:center;margin:20px 0 8px}
+.lockDots i{width:16px;height:16px;border-radius:50%;border:2px solid #fff}
+.lockDots i.f{background:#fff}
+.lockMsg{min-height:22px;font-size:13.5px;opacity:.92;line-height:1.7}
+.lockPad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px;max-width:264px;margin-left:auto;margin-right:auto}
+.lockPad button{height:62px;width:62px;margin:0 auto;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;font-size:24px;font-weight:700;font-family:inherit;cursor:pointer}
+.lockPad button:active{background:rgba(255,255,255,.28)}
+.lockPad button.ghost{border:none;background:transparent;font-size:16px;width:auto}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.shake{animation:shake .45s}
 </style>
 </head>
 <body>
@@ -399,6 +412,16 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <div id="goalList" style="margin-top:8px"></div>
     </div>
     <div class="card">
+      <h2 class="sec" style="margin-top:0">🔒 حماية التطبيق</h2>
+      <p class="mut" id="lockState" style="margin-bottom:10px"></p>
+      <button class="btn" id="lockEnableBtn">تفعيل القفل برمز PIN</button>
+      <button class="btn ghost" id="lockChangeBtn" style="margin-top:8px">تغيير الرمز</button>
+      <button class="btn ghost" id="lockOffBtn" style="margin-top:8px">إيقاف القفل</button>
+      <label class="fl" style="margin-top:12px;display:block">القفل التلقائي عند ترك التطبيق</label>
+      <select class="fld" id="lockMins"><option value="0">فورًا</option><option value="1">بعد دقيقة</option><option value="5">بعد ٥ دقائق</option><option value="15">بعد ١٥ دقيقة</option><option value="30">بعد ٣٠ دقيقة</option></select>
+      <p class="hintline">يُحفَظ الرمز على جهازك بصيغة مشفّرة (بصمة SHA-256) ولا يغادر هاتفك أبدًا. إن نسيت الرمز فلا وسيلة لفتح التطبيق إلا مسح بياناته — اختر رمزًا لا تنساه واحفظه في مكان آمن.</p>
+    </div>
+    <div class="card">
       <h2 class="sec" style="margin-top:0">🎨 ثيمات المظهر <a id="themeReset">الافتراضي</a></h2>
       <p class="hintline" style="margin-top:0">اضغط أي ثيم فيتغيّر شكل التطبيق كاملاً فوراً — ويُحفظ اختيارك على هاتفك.</p>
       <h3 class="subh">👔 ثيمات رجالية</h3>
@@ -436,7 +459,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
       <input type="file" id="importFile" accept="application/json" hidden>
       <button class="btn danger" id="wipeBtn">🗑️ حذف كل البيانات</button>
     </div>
-    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.1<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
+    <p style="text-align:center;color:var(--mut);font-size:12px">تتبّع المصروفات — الإصدار 10.2<br>بياناتك محفوظة على هاتفك فقط ولا تغادره.</p>
   </section>
   <div class="screen" id="screen-lab">
     <div class="card">
@@ -500,6 +523,13 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green)}
 
 <button class="fab" id="fab" aria-label="إضافة حركة">＋</button>
 
+<div id="lockScr"><div class="lockBox">
+  <div style="font-size:52px">🔒</div>
+  <div style="font-size:20px;font-weight:800" id="lockTitle">التطبيق مقفل</div>
+  <div class="lockDots" id="lockDots"><i></i><i></i><i></i><i></i></div>
+  <div class="lockMsg" id="lockMsg">أدخل رمزك لفتح التطبيق</div>
+  <div class="lockPad"><button onclick="lockKey('1')">1</button><button onclick="lockKey('2')">2</button><button onclick="lockKey('3')">3</button><button onclick="lockKey('4')">4</button><button onclick="lockKey('5')">5</button><button onclick="lockKey('6')">6</button><button onclick="lockKey('7')">7</button><button onclick="lockKey('8')">8</button><button onclick="lockKey('9')">9</button><button class="ghost" id="lockCancel" onclick="lockKey('cancel')">إلغاء</button><button onclick="lockKey('0')">0</button><button class="ghost" onclick="lockKey('back')">⌫</button></div>
+</div></div>
 <nav>
   <button data-go="home" class="on"><span class="ni">🏠</span>الرئيسية</button>
   <button data-go="tx"><span class="ni">📋</span>الحركات</button>
@@ -550,7 +580,7 @@ let state=load(), view=new Date(); view.setDate(1);
 let fType='expense', fCat='طعام', editingId=null, typeFilter='all', catFilter='';
 let acctFilter='';
 function load(){let s={tx:[],budgets:{},currency:'LYD'};try{const p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.tx))s=p}catch(e){}
- s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
+ s.budgets=s.budgets||{}; s.catBudgets=s.catBudgets||{}; s.goals=s.goals||[]; s.dark=!!s.dark; s.theme=s.theme||''; s.font=s.font||''; s.wishes=s.wishes||[]; s.challenges=s.challenges||[]; s.work=s.work||{salary:0,dpm:22,hpd:8}; s.debts=s.debts||[]; s.lock=s.lock||{on:false,hash:'',salt:'',mins:5}; s.round=s.round||{on:false,step:10,goalId:''}; s.sweeps=s.sweeps||[];
  s.tx.forEach(t=>{t.time=t.time||'';t.account=t.account||'cash';t.recurring=!!t.recurring;t.mood=t.mood||''}); return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 const $=id=>document.getElementById(id);
@@ -569,9 +599,9 @@ function relDay(dateStr){const t=todayStr();const y=new Date(Date.now()-864e5).t
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function go(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$('screen-'+name).classList.add('on');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===name));window.scrollTo({top:0});if(name==='lab')renderLab()}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-/* ---------- themes v5 ---------- */
+
 const THEMES=[
-/* رجالية */
+
 ['m1','m','الذهبي الملكي','أسود وذهبي فاخر','#AE7E0A','#8A6408','#0B1120','#141E33','#1A2742','#2A3A5C','#EDF2FC','#97A7C6','#1D2B4D','#131F3A','#0B1120','#232F4D'],
 ['m2','m','الزمردي الليلي','أخضر عميق هادئ','#0FA37A','#0B8A5F','#0A1410','#122019','#182A20','#24402F','#E7F4EC','#8FAE9C','#0E3B2A','#0A2A1E','#06180F','#173528'],
 ['m3','m','الأزرق الفولاذي','رصين وواضح','#33608C','#274B6E','#EEF2F6','#FFFFFF','#F6F9FB','#D9E2EC','#16283C','#64788E','#3E6DA3','#33608C','#22405F','#E3EDF7'],
@@ -582,7 +612,7 @@ const THEMES=[
 ['m8','m','البنفسجي الليلي','غامض وعميق','#8B6FD8','#6D4FC2','#140F24','#1F1836','#271E47','#3A2E63','#EFEAFB','#A79BCB','#4A3590','#33235F','#1B1236','#2A2049'],
 ['m9','m','النحاسي البرونزي','دفء معدني','#B06A2C','#8C5220','#F8F1EA','#FFFFFF','#FBF5EE','#EBDCCB','#37220E','#8C7358','#CD8A44','#B06A2C','#7E4C1C','#F5E7D7'],
 ['m10','m','الزيتوني','هادئ وعملي','#6B7F2A','#52631E','#F2F4E8','#FFFFFF','#F8FAF0','#E0E4CB','#272E12','#767E5A','#8CA03C','#6B7F2A','#48561A','#EBEFDA'],
-/* نسائية */
+
 ['f1','f','الوردي الناعم','أنوثة هادئة','#D14D8B','#AE3570','#FDF1F6','#FFFFFF','#FEF7FA','#F6D9E6','#3D1225','#9A6B82','#F083B4','#D14D8B','#A02A5E','#FCE4EF'],
 ['f2','f','اللافندر الحالم','بنفسجي فاتح رقيق','#8A6FD8','#6D4FC2','#F3F0FD','#FFFFFF','#F8F6FE','#E2DBF6','#2A1E4D','#8378AC','#B79CED','#8A6FD8','#5E3FB0','#ECE7FC'],
 ['f3','f','الخوخي الدافئ','مشرق ومبهج','#E07840','#C25E2A','#FDF3EC','#FFFFFF','#FEF8F3','#F6DFCE','#3D2110','#9A7B63','#F5A26B','#E07840','#B34E1E','#FCEBDD'],
@@ -593,7 +623,7 @@ const THEMES=[
 ['f8','f','الأوركيد','بنفسجي وردي زاهي','#B04FD0','#8E35AC','#FAF0FD','#FFFFFF','#FCF6FE','#EFD6F6','#33133D','#8E6B9A','#CE7FEA','#B04FD0','#7E2599','#F6E2FC'],
 ['f9','f','البرقوقي الليلي','أنيق وغامض','#C77FB8','#A85A9C','#1D0F1E','#2C1830','#38203C','#4E2C52','#FAEDF8','#B08FA9','#5C2A63','#3F1D45','#240F28','#37203B'],
 ['f10','f','الساكورا','زهور الكرز اليابانية','#DE6FA3','#C24E85','#FDF3F7','#FFFFFF','#FEF8FA','#F6DEE8','#3A1626','#9C7387','#F2A7C6','#DE6FA3','#B83A76','#FBE7F0'],
-/* ليلية */
+
 ['n1','n','منتصف الليل','أزرق ليلي عميق','#5B8DEF','#3A66C4','#070B16','#0E1626','#14203A','#22345C','#E8EEFC','#8CA0C8','#16294D','#0E1B36','#05080F','#16233F'],
 ['n2','n','العنبري الليلي','دفء ذهبي خافت','#E8A13A','#C77F1F','#171106','#241A0B','#2E210E','#4A3717','#FBF3DF','#C4A97B','#3A2A0E','#241A0B','#120C04','#2E2210'],
 ['n3','n','الكوني','بنفسجي فضائي','#9D7BEA','#7B55D4','#0E0819','#190E2E','#21143E','#36235C','#F0EAFB','#A894CC','#2E1A56','#1D1038','#0B0516','#22153F'],
@@ -640,7 +670,7 @@ function renderThemes(){
  if(n)n.innerHTML=THEMES.filter(t=>t.g==='n').map(card).join('');
  renderFonts();
 }
-/* ---------- fonts ---------- */
+
 const FONTS=[
 ['','الحديث الافتراضي','خط نظام الهاتف','system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'],
 ['naskh','النسخ الأنيق','كلاسيكي مريح للقراءة','"Noto Naskh Arabic","Traditional Arabic","Times New Roman",serif'],
@@ -657,7 +687,7 @@ function renderFonts(){
 }
 $('themeReset').onclick=()=>{state.theme='';state.dark=false;save();applyDark();renderThemes();toast('تمت العودة للثيم الافتراضي')};
 $('darkBtn').onclick=toggleDark; $('darkBtn2').onclick=toggleDark;
-/* ---------- render ---------- */
+
 function render(){
  const now=new Date(), hr=now.getHours();
  const greet=hr<12?'صباح الخير':'مساء الخير';
@@ -668,7 +698,7 @@ function render(){
  $('heroNet').textContent=fmt(net);
  $('heroHint').textContent=tx.length?('سجّلت '+tx.length+' حركة هذا الشهر • متوسط المصروف اليومي '+fmt(exp/daysIn)+(inc?' • ادّخرت '+Math.max(0,Math.round(net/inc*100))+'% من دخلك':'')):'لا حركات بعد في هذا الشهر — ابدأ بزر ＋';
  $('sumInc').textContent=fmt(inc); $('sumExp').textContent=fmt(exp);
- /* accounts balances (all time, up to end of viewed month) */
+ 
  const upto=tx.length||true; const endKey=ym(view);
  $('acctStrip').innerHTML=ACCOUNTS.map(a=>{const bal=state.tx.filter(t=>t.account===a[0]&&t.date.slice(0,7)<=endKey).reduce((s,t)=>s+(t.type==='income'?t.amount:-t.amount),0);
   return '<div class="acct"><div class="ai">'+a[2]+'</div><div class="at">'+a[1]+'</div><div class="av">'+fmt(bal)+'</div></div>'}).join('');
@@ -735,7 +765,7 @@ function renderTxList(){
  $('txList').innerHTML=html;
 }
 function renderReports(tx,exp,inc){
- /* insights */
+ 
  const daysIn=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
  const isCur=ym(view)===ym(new Date()); const elapsed=isCur?new Date().getDate():daysIn;
  const forecast=isCur&&elapsed>0?exp/elapsed*daysIn:exp;
@@ -753,7 +783,7 @@ function renderReports(tx,exp,inc){
  const by={};tx.filter(t=>t.type==='expense').forEach(t=>by[t.cat]=(by[t.cat]||0)+t.amount);
  const entries=Object.entries(by).sort((a,b)=>b[1]-a[1]);
  $('rankList').innerHTML=entries.length?entries.map((e,i)=>'<div class="rank"><div class="n">'+(i+1)+'</div><div><div style="display:flex;justify-content:space-between;font-size:13.5px"><b>'+catIcon(e[0])+' '+esc(e[0])+'</b><span style="color:var(--mut)">'+Math.round(e[1]/exp*100)+'%</span></div><div class="bar2"><i style="width:'+(e[1]/entries[0][1]*100)+'%"></i></div></div><b style="font-size:13.5px">'+fmt(e[1])+'</b></div>').join(''):'<div class="empty">لا مصروفات هذا الشهر.</div>';
- /* category budgets */
+ 
  const cb=state.catBudgets[ym(view)]||{};
  const cbKeys=Object.keys(cb);
  $('catBudgetCard').style.display=cbKeys.length?'block':'none';
@@ -781,7 +811,7 @@ function renderStats(){
  if(state.tx.length){const sorted=[...state.tx].sort(byDT);$('statFirst').textContent=sorted[sorted.length-1].date+' '+(sorted[sorted.length-1].time||'');$('statLast').textContent=sorted[0].date+' '+(sorted[0].time||'')}
  else{$('statFirst').textContent='—';$('statLast').textContent='—'}
 }
-/* ---------- smart engine v4 ---------- */
+
 const NEEDS=['طعام','سكن','فواتير','مواصلات','صحة','تعليم','اتصالات'];
 const monthShift=(base,delta)=>new Date(base.getFullYear(),base.getMonth()+delta,1);
 const prevAvgMonths=(n)=>{let arr=[];for(let i=1;i<=n;i++)arr.push(monthTx(monthShift(view,-i)));return arr};
@@ -841,28 +871,28 @@ function smartInsights(){
  const daysIn=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
  const isCur=ym(view)===ym(new Date()), elapsed=isCur?new Date().getDate():daysIn;
  if(!state.tx.length){out.push({k:'info',i:'👋',t:'سجّل حركاتك بانتظام وسيبدأ المستشار الذكي بتحليل أنماطك وتقديم نصائح مخصصة لك.'});return out}
- /* pace */
+ 
  const b=state.budgets[ym(view)]||0;
  if(isCur&&b&&elapsed>0){const sp=exp/b, dp=elapsed/daysIn;
   if(sp>dp+0.15)out.push({k:'warn',i:'🚨',t:'تنفق أسرع من إيقاع الشهر: استهلكت '+Math.round(sp*100)+'% من ميزانيتك بينما مضى '+Math.round(dp*100)+'% فقط من الشهر.'});
   else out.push({k:'good',i:'✅',t:'إيقاع إنفاقك ضمن الميزانية حتى الآن ('+Math.round(sp*100)+'% مستهلك مقابل '+Math.round(dp*100)+'% من الشهر).'})}
- /* anomaly */
+ 
  const prevBy={}; prevs.forEach(p=>p.filter(t=>t.type==='expense').forEach(t=>prevBy[t.cat]=(prevBy[t.cat]||0)+t.amount/3));
  const curBy={}; tx.filter(t=>t.type==='expense').forEach(t=>curBy[t.cat]=(curBy[t.cat]||0)+t.amount);
  Object.entries(curBy).sort((a,c)=>c[1]-a[1]).slice(0,3).forEach(([c,v])=>{const avg=prevBy[c]||0;
   if(avg>0&&v>avg*1.4&&v-avg>=50)out.push({k:'warn',i:'📈',t:'إنفاق غير معتاد في «'+c+'»: '+fmt(v)+' هذا الشهر مقابل متوسط '+fmt(Math.round(avg))+' — زيادة '+Math.round((v/avg-1)*100)+'%.'})});
- /* leaks */
+ 
  const th=Math.max(10,inc*0.005); const small=tx.filter(t=>t.type==='expense'&&t.amount<=th);
  if(small.length>=4)out.push({k:'warn',i:'🕳️',t:'تسريبات صغيرة: '+small.length+' مصروفاً صغيراً (≤ '+fmt(th)+') مجموعها '+fmt(sum(small,'expense'))+' هذا الشهر — الصغير المتكرر يصنع رقماً كبيراً.'});
- /* subscriptions detected */
+ 
  const groups={}; state.tx.filter(t=>t.type==='expense').forEach(t=>{const k=t.cat+'|'+t.amount;(groups[k]=groups[k]||new Set()).add(t.date.slice(0,7))});
  const subs=Object.entries(groups).filter(([k,s])=>s.size>=2&&[...s].some(m=>m>=ym(monthShift(new Date(),-3)))).map(([k])=>k);
  if(subs.length)out.push({k:'info',i:'🔁',t:'اكتشفت '+subs.length+' مصروفاً ثابتاً يتكرر شهرياً بنفس المبلغ ('+subs.slice(0,3).map(k=>k.split('|')[0]+' '+fmt(+k.split('|')[1])).join('، ')+') — راجعها، فربما فيها اشتراك منسي.'});
- /* weekday peak */
+ 
  const wd={}; state.tx.filter(t=>t.type==='expense').forEach(t=>{const d=new Date(t.date+'T12:00').getDay();wd[d]=(wd[d]||0)+t.amount});
  const peak=Object.entries(wd).sort((a,c)=>c[1]-a[1])[0];
  if(peak)out.push({k:'info',i:'📅',t:'أكثر أيام الأسبوع إنفاقاً عندك هو «'+['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][+peak[0]]+'» بإجمالي '+fmt(peak[1])+' عبر كل الشهور.'});
- /* runway / forecast */
+ 
  const allNet=sum(state.tx,'income')-sum(state.tx,'expense');
  if(isCur&&elapsed>3){const dailyNet=(inc-exp)/elapsed;
   if(dailyNet<0&&allNet>0)out.push({k:'warn',i:'⏳',t:'بهذا الإيقاع، رصيدك التراكمي ('+fmt(allNet)+') سيكفي حوالي '+Math.max(1,Math.floor(allNet/Math.abs(dailyNet)))+' يوماً — خفّض المصروف اليومي لتمديده.'});
@@ -870,7 +900,7 @@ function smartInsights(){
  const last3E=[-1,-2,-3].map(i=>sum(monthTx(monthShift(view,i)),'expense'));
  if(last3E.some(v=>v>0)){const avg=last3E.reduce((a,c)=>a+c,0)/3;const trend=(last3E[0]-last3E[2])/2;const fc=Math.max(0,Math.round(avg+trend));
   out.push({k:'info',i:'🔮',t:'توقّع مصروفات الشهر القادم بناءً على اتجاه آخر ٣ شهور: حوالي '+fmt(fc)+'.'})}
- /* zero-spend days */
+ 
  if(isCur){const spentDays=new Set(tx.filter(t=>t.type==='expense').map(t=>+t.date.slice(8,10)));let zero=0;for(let d=1;d<=elapsed;d++)if(!spentDays.has(d))zero++;
   if(zero>=3)out.push({k:'good',i:'🏆',t:'لديك '+zero+' أيام بلا أي مصروف هذا الشهر حتى الآن — استمر، هذه قوة الادخار الحقيقية.'})}
  if(!out.length)out.push({k:'good',i:'👍',t:'لا ملاحظات مقلقة — إنفاقك متوازن هذا الشهر.'});
@@ -944,7 +974,7 @@ function renderAchv(){
  ['⚖️','ملتزم','شهر كامل ضمن الميزانية',!!state.budgets[ym(view)]&&exp>0&&exp<=(state.budgets[ym(view)]||0)]];
  $('achvList').innerHTML=A.map(a=>'<div class="badge '+(a[3]?'':'lock')+'"><div class="bi">'+a[0]+'</div><div class="bn">'+a[1]+'</div><div class="bd">'+a[2]+'</div><div class="bd">'+(a[3]?'✅ محقق':'🔒 لم يُفتح بعد')+'</div></div>').join('');
 }
-/* ---------- form ---------- */
+
 function fillCatGrid(){
  $('catGrid').innerHTML=CATS[fType].map(c=>'<button type="button" class="catcell '+(fCat===c[0]?'on':'')+'" data-cat="'+c[0]+'"><span class="ci">'+c[1]+'</span>'+c[0]+'</button>').join('');
  document.querySelectorAll('.catcell').forEach(b=>b.onclick=()=>{fCat=b.dataset.cat;$('fCatCustom').value='';fillCatGrid()});
@@ -974,7 +1004,7 @@ $('saveTx').onclick=()=>{
  const d=new Date(date+'T12:00'); if(d.getFullYear()!==view.getFullYear()||d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1)}
  render();
 };
-/* ---------- controls ---------- */
+
 $('prevM').onclick=()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);render()};
 $('nextM').onclick=()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);render()};
 $('search').oninput=renderTxList; $('dateFrom').onchange=renderTxList; $('dateTo').onchange=renderTxList;
@@ -998,7 +1028,6 @@ $('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().the
 $('wipeBtn').onclick=()=>{if(confirm('سيتم حذف كل الحركات والميزانيات والأهداف نهائياً. هل أنت متأكد؟')){state={tx:[],budgets:{},catBudgets:{},goals:[],currency:state.currency,dark:state.dark};save();render();toast('تم حذف كل البيانات')}};
 applyDark(); applyFont(); render();
 
-/* ================= LAB v7 — unique local tools ================= */
 const MOODS=[['happy','😊','سعيد'],['calm','😌','هادئ'],['neutral','😐','عادي'],['tired','😩','متعب'],['stressed','😤','متوتر']];
 let fMood='';
 function drawMoodChips(){const b=$('moodChips');if(!b)return;b.innerHTML=MOODS.map(m=>'<button type="button" class="chip'+(fMood===m[0]?' on':'')+'" data-mood="'+m[0]+'" style="cursor:pointer">'+m[1]+' '+m[2]+'</button>').join('');b.querySelectorAll('[data-mood]').forEach(x=>x.onclick=()=>{fMood=fMood===x.dataset.mood?'':x.dataset.mood;drawMoodChips()})}
@@ -1020,22 +1049,22 @@ function addChallenge(){const kind=$('chalKind').value;const days=parseInt($('ch
 window.chalDel=id=>{state.challenges=state.challenges.filter(x=>x.id!==id);save();renderLab()};
 function moodStats(){const m={};state.tx.forEach(t=>{if(t.type!=='expense'||!t.mood)return;const e=m[t.mood]=m[t.mood]||{n:0,sum:0};e.n++;e.sum+=t.amount});return m}
 function renderLab(){
- /* wishes */
+ 
  const surplus=monthlyAvg('income')-monthlyAvg('expense');const perDay=surplus/30;
  const act=state.wishes.filter(w=>w.st==='wait');const dropped=state.wishes.filter(w=>w.st==='dropped');const savedSum=dropped.reduce((s,w)=>s+w.price,0);
  $('wishSaved').textContent=dropped.length?('🏆 تخلّيت عن '+dropped.length+' من المشتريات المؤجلة ووفّرت '+fmt(savedSum)):'';
  $('wishBox').innerHTML=act.length?act.map(w=>{const leftMs=w.at+w.cool*36e5-Date.now();const ready=leftMs<=0;let afford='';if(perDay>0){afford='بهذا الإيقاع تقدر تشتريه بعد ≈ '+Math.max(1,Math.ceil(w.price/perDay))+' يوم دون أن يهتز شهرك'}else{afford='إيقاعك الحالي لا يترك فائضًا — التأجيل يحميك الآن'}
    const goal=state.goals.filter(g=>(g.target-(g.saved||0))>0).sort((a,b)=>(a.target-(a.saved||0))-(b.target-(b.saved||0)))[0];let opp='';if(goal&&perDay>0){opp=' ولو وجّهت ثمنه لهدف «'+goal.name+'» لقرّبته ≈ '+Math.max(1,Math.round(w.price/perDay))+' يوم'}
    return '<div class="tx"><div class="mid"><div class="nm">'+esc(w.name)+'</div><div class="ds">'+fmt(w.price)+' • تهدئة '+w.cool+' ساعة'+(ready?' • ✅ انتهت التهدئة':' • ⏳ تبقّى ≈ '+Math.ceil(leftMs/36e5)+' ساعة')+'</div><div class="ds">'+afford+opp+'</div></div>'+(ready?'<button class="chip" style="cursor:pointer" onclick="wishDecide(\''+w.id+'\',true)">اشترِ الآن</button><button class="chip" style="cursor:pointer" onclick="wishDecide(\''+w.id+'\',false)">تخلَّ عنه</button>':'<button class="chip" style="cursor:pointer" onclick="wishDel(\''+w.id+'\')">حذف</button>')+'</div>'}).join(''):'<p class="mut">لا شيء مؤجَّل الآن. أضف أي غرض تفكّر بشرائه وسيمنحك التطبيق مهلة تهدئة محسوبة من دخلك، وتاريخ قدرة آمنًا، وثمن الفرصة البديلة — قبل أن تدفع قرشًا.</p>';
- /* prices */
+ 
  const st=priceStats();const items=Object.entries(st).filter(([,e])=>e.n>=2).sort((a,b)=>b[1].n-a[1].n).slice(0,6);const infl=personalInflation(st);
  $('priceBox').innerHTML=(infl!==null?'<p>📈 <b>مؤشر تضخّمك الشخصي: '+(infl>=0?'+':'')+infl.toFixed(1)+'٪</b> — تغيّر أسعار بنودك المعتادة بين مشترياتك الأولى والأخيرة.</p>':'')+(items.length?items.map(([k,e])=>{const dev=e.avg?((e.last/e.avg)-1)*100:0;return '<div class="tx"><div class="mid"><div class="nm">'+esc(k)+'</div><div class="ds">اشتُري '+e.n+' مرات • متوسط سعرك '+fmt(e.avg)+' • آخر مرة '+fmt(e.last)+'</div></div><div class="am" style="color:'+(dev>5?'var(--red)':dev<-5?'var(--green)':'var(--mut)')+'">'+(dev>5?'⬆':dev<-5?'⬇':'➖')+' '+Math.abs(dev).toFixed(0)+'٪</div></div>'}).join(''):'<p class="mut">سجّل مصروفات بملاحظات واضحة (مثل «قهوة» أو «بنزين») وسيبني لك ذاكرة أسعار شخصية، وينبّهك عند دفع أكثر من معدّلك بـ ٢٥٪، ويحسب تضخّمك الشخصي الحقيقي.</p>');
- /* challenges */
+ 
  $('chalCat').innerHTML=CATS.expense.map(c=>'<option value="'+c[0]+'">'+c[1]+' '+c[0]+'</option>').join('');
  const chs=state.challenges.slice().reverse();
  $('chalBox').innerHTML=chs.length?chs.map(c=>{const p=chalProgress(c);const title=c.kind==='zero'?('بلا مصروفات — '+c.days+' أيام'):('سقف «'+c.cat+'» ≤ '+fmt(c.cap)+' خلال '+c.days+' أيام');const detail=c.kind==='zero'?('أيام نظيفة: '+p.ok+' من '+p.elapsed+' انقضت') :('أُنفق من الفئة حتى الآن: '+fmt(p.spentCat));const badge=p.status==='done'?'🏆 أُكمل':p.status==='fail'?'💔 انتهى':'🔥 جارٍ — اليوم '+Math.min(p.elapsed+ (p.status==='run'?0:0),p.total)+' من '+p.total;
   return '<div class="tx"><div class="mid"><div class="nm">'+title+'</div><div class="ds">'+detail+'</div><div class="ds">'+badge+'</div></div><button class="chip" style="cursor:pointer" onclick="chalDel(\''+c.id+'\')">حذف</button></div>'}).join(''):'<p class="mut">تحدَّ نفسك: أيام بلا صرف، أو سقف صارم لفئة واحدة — والتطبيق يتحقق تلقائيًا من حركاتك كل يوم.</p>';
- /* work time */
+ 
  const rate=hourlyRate();const mtx=monthTx();const mexp=sum(mtx,'expense');
  const top3=mtx.filter(t=>t.type==='expense').sort((a,b)=>b.amount-a.amount).slice(0,3);
  $('workBox').innerHTML=rate>0?('<p>ساعة عملك تساوي ≈ <b>'+fmt(rate)+'</b>/ساعة. مصروفات هذا الشهر ('+fmt(mexp)+') كلّفتك <b>≈ '+workHours(mexp).toFixed(1)+' ساعة عمل</b> — أي ≈ '+(workHours(mexp)/((+state.work.hpd)||8)).toFixed(1)+' يوم عمل كامل.</p>'+(top3.length?top3.map(t=>'<div class="tx"><div class="mid"><div class="nm">'+esc(t.cat)+'</div><div class="ds">'+(t.note?esc(t.note)+' • ':'')+t.date+'</div></div><div class="am" style="color:var(--red)">'+fmt(t.amount)+' ≈ '+workHours(t.amount).toFixed(1)+' س</div></div>').join(''):''))
@@ -1043,7 +1072,7 @@ function renderLab(){
  if(document.activeElement!==$('workSalary'))$('workSalary').value=state.work.salary||'';
  if(document.activeElement!==$('workDpm'))$('workDpm').value=state.work.dpm||22;
  if(document.activeElement!==$('workHpd'))$('workHpd').value=state.work.hpd||8;
- /* mood */
+ 
  const ms=moodStats();const entries=Object.entries(ms);
  if(entries.length){const maxSum=Math.max(...entries.map(([,e])=>e.sum));let ins='';const rich=entries.filter(([,e])=>e.n>=2);if(rich.length>=2){const hi=rich.reduce((a,b)=>b[1].sum/b[1].n>a[1].sum/a[1].n?b:a);const lo=rich.reduce((a,b)=>b[1].sum/b[1].n<a[1].sum/a[1].n?b:a);const ratio=(hi[1].sum/hi[1].n)/(lo[1].sum/lo[1].n);if(ratio>=1.3){const mn=k=>(MOODS.find(m=>m[0]===k)||[])[2]||k;ins='<p>🔍 نمط مكتشف: متوسط صرفك وأنت «'+mn(hi[0])+'» أعلى بـ <b>'+Math.round((ratio-1)*100)+'٪</b> من صرفك وأنت «'+mn(lo[0])+'».</p>'}}
   $('moodBox').innerHTML=ins+entries.sort((a,b)=>b[1].sum-a[1].sum).map(([k,e])=>{const md=MOODS.find(m=>m[0]===k)||['','😐',k];return '<div class="tx"><div class="mid"><div class="nm">'+md[1]+' '+md[2]+'</div><div class="ds">'+e.n+' حركة • المتوسط '+fmt(e.sum/e.n)+'</div></div><div class="am" style="color:var(--red)">'+fmt(e.sum)+'</div></div><div class="progress"><i style="width:'+Math.round(e.sum/maxSum*100)+'%"></i></div>'}).join('')}
@@ -1056,8 +1085,6 @@ $('workSave').onclick=()=>{state.work={salary:parseFloat($('workSalary').value)|
 $('fAmount').addEventListener('input',updateWorkHint);
 drawMoodChips();
 
-
-/* ================= DEEP v8 — debts, liquidity radar, safe-to-spend, round-ups, stress test ================= */
 function debtsRemain(d){return Math.max(0,(+d.total||0)-(+d.paid||0))}
 function addDebt(){const name=$('debtName').value.trim();const total=parseFloat($('debtTotal').value);const due=$('debtDue').value;const dir=$('debtDir').value;if(!name||!total||total<=0){toast('أدخل اسم الدين ومبلغه');return}state.debts.push({id:'d'+Date.now(),name,total,paid:0,due:due||'',dir});save();$('debtName').value='';$('debtTotal').value='';renderLab();toast('📌 سُجّل في الديون والمستحقات')}
 window.debtPay=id=>{const d=state.debts.find(x=>x.id===id);if(!d)return;const v=prompt('كم دفعت من «'+d.name+'»؟ المتبقي '+fmt(debtsRemain(d)),'');if(v===null)return;const a=parseFloat(v);if(!a||a<=0){toast('أدخل مبلغًا صحيحًا');return}d.paid=Math.min(d.total,(+d.paid||0)+a);save();render();renderLab();toast(debtsRemain(d)===0?'🎉 سُدّد «'+d.name+'» بالكامل!':'تم تسجيل الدفعة — المتبقي '+fmt(debtsRemain(d)))};
@@ -1098,9 +1125,6 @@ $('stRun').onclick=runStress;
 $('roundSave').onclick=()=>{state.round={on:$('roundOn').checked,step:parseInt($('roundStep').value)||10,goalId:$('roundGoal').value};save();renderRound();toast(state.round.on?'🐷 فُعّل التقريب الادخاري':'أُوقف التقريب الادخاري')};
 renderSafe();
 
-
-
-/* ================= v10: accounts & transfers, acct filter, MoM cats, savings curve, zakat ================= */
 function accBalance(id,endKey){return state.tx.reduce((s,t)=>{if(endKey&&t.date.slice(0,7)>endKey)return s;
  if(t.type==='income'&&t.account===id)return s+t.amount;
  if(t.type==='expense'&&t.account===id)return s-t.amount;
@@ -1141,6 +1165,55 @@ function renderCum(){const el=$('cumChart');if(!el)return;const s=cumSeries();co
  el.innerHTML='<div class="chart">'+s.map((x,i)=>'<div class="col"><div class="cv">'+(x.cum?new Intl.NumberFormat('ar',{notation:'compact'}).format(x.cum):'')+'</div><div class="bar '+(i===s.length-1?'cur':'')+'" style="height:'+Math.max(3,Math.abs(x.cum)/max*95)+'px;'+(x.cum<0?'background:var(--red)':'')+'"></div><div class="cl">'+x.d.toLocaleDateString('ar',{month:'short'})+'</div></div>').join('')+'</div>'
  +'<p class="hintline">المنحنى = مجموع (الدخل − المصروفات) تراكميًا عبر آخر ١٢ شهرًا. ارتفاعه يعني أنك تدّخر فعليًا شهرًا بعد شهر.</p>'}
 const __renderV10=render;render=function(){__renderV10();renderAcctFix();renderTransfers();renderMom();renderCum()};
+
+const LOCK_LEN=4;
+let lockMode='unlock', lockBuf='', lockFirst='', lockFails=0, lockWaitUntil=0, lockHiddenAt=0, lockOnDone=null;
+function lockSalt(){let s='';const c='abcdef0123456789';for(let i=0;i<16;i++)s+=c[Math.floor(Math.random()*16)];return s}
+async function pinHash(pin,salt){
+ if(window.crypto&&crypto.subtle&&crypto.subtle.digest){try{const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));return 's256:'+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){}}
+ let h1=5381,h2=52711;const s=salt+':'+pin;for(let i=0;i<s.length;i++){const ch=s.charCodeAt(i);h1=((h1*33)^ch)>>>0;h2=((h2*31)+ch)>>>0}return 'h1:'+h1.toString(16)+'.'+h2.toString(16)}
+async function setPin(pin){const salt=lockSalt();state.lock={on:true,hash:await pinHash(pin,salt),salt,mins:(state.lock&&state.lock.mins!=null)?state.lock.mins:5};save()}
+async function checkPin(pin){if(!state.lock||!state.lock.hash)return false;return (await pinHash(pin,state.lock.salt))===state.lock.hash}
+function lockShow(mode,title,msg,onDone){lockMode=mode;lockBuf='';lockOnDone=onDone||null;
+ $('lockScr').classList.add('on');$('lockTitle').textContent=title;$('lockMsg').textContent=msg;
+ $('lockCancel').style.visibility=(mode==='unlock')?'hidden':'visible';drawLockDots()}
+function lockHide(){$('lockScr').classList.remove('on');lockBuf='';lockOnDone=null}
+function drawLockDots(){[...$('lockDots').children].forEach((d,i)=>d.classList.toggle('f',i<lockBuf.length))}
+function shakeLock(msg){$('lockMsg').textContent=msg;const b=document.querySelector('.lockBox');if(b){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')}}
+async function lockKey(k){
+ if(k==='cancel'){lockHide();return}
+ if(k==='back'){lockBuf=lockBuf.slice(0,-1);drawLockDots();return}
+ if(Date.now()<lockWaitUntil)return;
+ if(lockBuf.length>=LOCK_LEN)return;
+ lockBuf+=k;drawLockDots();
+ if(lockBuf.length<LOCK_LEN)return;
+ const pin=lockBuf;
+ if(lockMode==='setup1'){lockFirst=pin;lockBuf='';drawLockDots();lockMode='setup2';$('lockTitle').textContent='تأكيد الرمز';$('lockMsg').textContent='أعد إدخال الرمز نفسه للتأكيد';return}
+ if(lockMode==='setup2'){
+  if(pin===lockFirst){await setPin(pin);lockHide();renderLockSettings();toast('🔒 تم تفعيل قفل التطبيق')}
+  else{lockBuf='';drawLockDots();lockMode='setup1';$('lockTitle').textContent='تعيين رمز القفل';shakeLock('الرمزان غير متطابقين — اختر رمزًا من جديد')}
+  return}
+ const ok=await checkPin(pin);
+ if(ok){const cb=lockOnDone;lockHide();lockFails=0;if(cb)cb();else toast('🔓 مرحبًا بعودتك')}
+ else{lockFails++;lockBuf='';drawLockDots();
+  if(lockFails>=5){lockWaitUntil=Date.now()+30000;lockFails=0;shakeLock('محاولات كثيرة خاطئة — انتظر ٣٠ ثانية')}
+  else shakeLock('رمز غير صحيح — حاول مجددًا')}}
+function lockNow(){if(state.lock&&state.lock.on&&state.lock.hash)lockShow('unlock','🔒 التطبيق مقفل','أدخل رمزك لفتح التطبيق')}
+function lockSetup(){lockShow('setup1','تعيين رمز القفل','اختر رمزًا من ٤ أرقام واحفظه جيدًا — لا يمكن استرجاع البيانات بدونه')}
+function renderLockSettings(){const el=$('lockState');if(!el)return;const on=!!(state.lock&&state.lock.on&&state.lock.hash);
+ el.textContent=on?('🔒 القفل مفعّل — يُطلب الرمز عند فتح التطبيق، ويُقفل تلقائيًا بعد ترك التطبيق '+((state.lock.mins===0)?'فورًا':(state.lock.mins+' دقيقة/دقائق'))):'🔓 القفل غير مفعّل — أي شخص يمسك هاتفك يستطيع رؤية أموالك';
+ const m=$('lockMins');if(m)m.value=String((state.lock&&state.lock.mins!=null)?state.lock.mins:5);
+ $('lockEnableBtn').style.display=on?'none':'flex';
+ $('lockChangeBtn').style.display=on?'flex':'none';
+ $('lockOffBtn').style.display=on?'flex':'none'}
+const __rmV11=renderMore;renderMore=function(){__rmV11();renderLockSettings()};
+$('lockEnableBtn').onclick=lockSetup;
+$('lockChangeBtn').onclick=()=>lockShow('verify','تأكيد الرمز الحالي','أدخل رمزك الحالي أولًا',()=>lockSetup());
+$('lockOffBtn').onclick=()=>lockShow('verify','إيقاف القفل','أدخل رمزك لإيقاف القفل',()=>{state.lock={on:false,hash:'',salt:'',mins:5};save();renderLockSettings();toast('🔓 أُوقف قفل التطبيق')});
+$('lockMins').onchange=e=>{state.lock=state.lock||{on:false,hash:'',salt:'',mins:5};state.lock.mins=parseInt(e.target.value)||0;save();renderLockSettings();toast('⏱️ حُفظ توقيت القفل التلقائي')};
+document.addEventListener('visibilitychange',()=>{if(document.hidden){lockHiddenAt=Date.now()}
+ else if(lockHiddenAt&&state.lock&&state.lock.on&&state.lock.hash){const mins=(state.lock.mins!=null)?state.lock.mins:5;if(mins===0||Date.now()-lockHiddenAt>=mins*60000)lockNow();lockHiddenAt=0}});
+lockNow();
 
 </script>
 </body>
