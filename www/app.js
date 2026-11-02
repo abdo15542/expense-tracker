@@ -853,4 +853,4 @@ function pendingAb(){try{return !!localStorage.getItem('abPending')}catch(e){ret
 function clearPendingAb(){try{localStorage.removeItem('abPending')}catch(e){}}
 $('abNowBtn').onclick=async()=>{const ab=state.autoBackup;if(!ab||!ab.on){toast('فعّل النسخ التلقائي واختر ملف الوجهة أولًا من الزر بالأعلى');return}toast('⏳ جارٍ حفظ نسخة احتياطية الآن...');await autoBackupTick(true);const a2=state.autoBackup;if(a2&&a2.err)toast(a2.err==='no_destination'?'⚠️ لم تُحفَظ: لا يوجد ملف وجهة صالح — غيّر الملف واختره من جديد':'⚠️ لم تُحفَظ النسخة: تعذّرت الكتابة إلى الملف — جرّب اختيار ملف داخل مجلد التنزيلات');else toast('✅ حُفظت نسخة احتياطية الآن بنجاح')};
 setTimeout(()=>{autoBackupTick(false)},3000);
-
+document.addEventListener('contextmenu',e=>{const t=e.target;if(!t||!/INPUT|TEXTAREA/.test(t.tagName||''))e.preventDefault()});
