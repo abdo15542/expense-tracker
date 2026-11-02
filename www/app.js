@@ -761,3 +761,76 @@ if($('stmtMonth')&&!$('stmtMonth').value)$('stmtMonth').value=ym(new Date());
 const __rV14=render;render=function(){__rV14();renderCommit();renderNetWorth()};
 const __rlV14=renderLab;renderLab=function(){__rlV14();renderInst();renderSplit()};
 
+function acctName(id){const a=ACCOUNTS.find(x=>x[0]===id);return a?a[1]:id}
+function buildStatementData(from,to,acct){
+ const inR=t=>(!from||t.date>=from)&&(!to||t.date<=to);
+ const scopeAll=acct==='all';
+ const dayBefore=k=>{const d=new Date(k+'T00:00:00');d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)};
+ let opening=0;
+ if(from){const pb=dayBefore(from);opening=scopeAll?ACCOUNTS.reduce((s,a)=>s+accBalance(a[0],pb),0):accBalance(acct,pb)}
+ let bal=opening;
+ const rows=state.tx.filter(t=>{if(!inR(t))return false;if(scopeAll)return true;if(t.type==='transfer')return t.from===acct||t.to===acct;return t.account===acct})
+  .sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(String(a.id)<String(b.id)?-1:1));
+ const detailed=rows.map(t=>{let d=0,lab='',accName='';
+  if(t.type==='transfer'){accName='بين الحسابات';
+   if(scopeAll){d=0;lab='🔄 تحويل: '+acctName(t.from)+' ← '+acctName(t.to)}
+   else if(t.from===acct){d=-t.amount;lab='🔄 تحويل صادر إلى '+acctName(t.to)}
+   else{d=t.amount;lab='🔄 تحويل وارد من '+acctName(t.from)}}
+  else{d=t.type==='income'?t.amount:-t.amount;lab=t.cat;accName=acctName(t.account)}
+  bal=Math.round((bal+d)*100)/100;
+  return{date:t.date,time:t.time||'',type:t.type,cat:t.cat,note:t.note||'',lab,accName,amount:d,bal}});
+ const incTotal=Math.round(detailed.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0)*100)/100;
+ const expTotal=Math.round(detailed.filter(r=>r.type==='expense').reduce((s,r)=>s-r.amount,0)*100)/100;
+ const agg=(type)=>{const m={};detailed.filter(r=>r.type===type).forEach(r=>{m[r.cat]=m[r.cat]||{n:0,sum:0};m[r.cat].n++;m[r.cat].sum+=Math.abs(r.amount)});
+  const tot=type==='expense'?expTotal:incTotal;
+  return Object.entries(m).map(([cat,v])=>({cat,n:v.n,sum:Math.round(v.sum*100)/100,pct:tot?Math.round(v.sum/tot*1000)/10:0})).sort((a,b)=>b.sum-a.sum)};
+ return{from,to,acct,scopeAll,opening,closing:bal,rows:detailed,incTotal,expTotal,byCatExp:agg('expense'),byCatInc:agg('income'),count:detailed.length}}
+function renderStatementHtml(d){
+ const scope=d.scopeAll?'كل الحسابات':acctName(d.acct);
+ const period=d.from?('من '+d.from+' إلى '+(d.to||'اليوم')):'كل الفترات منذ بداية استخدام التطبيق';
+ const catRows=d.byCatExp.map(c=>'<tr><td>'+esc(c.cat)+'</td><td>'+c.n+'</td><td>'+fmt(c.sum)+'</td><td>'+c.pct+'٪</td></tr>').join('');
+ const incRows=d.byCatInc.map(c=>'<tr><td>'+esc(c.cat)+'</td><td>'+c.n+'</td><td>'+fmt(c.sum)+'</td><td>'+c.pct+'٪</td></tr>').join('');
+ const body=d.rows.map(r=>'<tr><td style="white-space:nowrap">'+r.date+(r.time?'<br><span style="color:#5F7263">'+esc(r.time)+'</span>':'')+'</td><td>'+esc(r.lab)+(r.note&&r.type!=='transfer'?'<br><span style="color:#5F7263">'+esc(r.note)+'</span>':'')+'</td><td>'+esc(r.accName)+'</td><td class="'+(r.amount>0?'pos':(r.amount<0?'neg':''))+'">'+(r.amount>0?'+':(r.amount<0?'−':''))+fmt(Math.abs(r.amount))+'</td><td>'+fmt(r.bal)+'</td></tr>').join('');
+ return '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>'
+ +'body{font-family:\'Segoe UI\',Tahoma,sans-serif;color:#1C2B1E;margin:0;padding:26px 28px;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+ +'header{background:linear-gradient(135deg,#14532D,#1B7A43);color:#fff;border-radius:14px;padding:20px 22px;margin-bottom:14px}'
+ +'h1{font-size:23px;margin:0 0 5px}.sub{opacity:.92;font-size:12.5px;line-height:1.8}'
+ +'.tiles{display:flex;gap:10px;margin:12px 0 4px}.tile{flex:1;border:1.5px solid #DCE5D8;border-radius:12px;padding:11px 12px;background:#F7FAF6}'
+ +'.tile .k{font-size:11.5px;color:#5F7263}.tile .v{font-size:18px;font-weight:800;margin-top:2px}'
+ +'table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0 14px}'
+ +'th{background:#14532D;color:#fff;padding:8px 7px;text-align:right;font-size:12px}'
+ +'td{padding:6.5px 7px;border-bottom:1px solid #E3EAE1;vertical-align:top}'
+ +'tr:nth-child(even) td{background:#F7FAF6}'
+ +'.neg{color:#B3261E;font-weight:700}.pos{color:#177245;font-weight:700}'
+ +'h2{font-size:16px;margin:16px 0 4px;color:#14532D}'
+ +'footer{margin-top:12px;border-top:1.5px dashed #C9D4C6;padding-top:8px;font-size:11px;color:#5F7263;text-align:center;line-height:1.9}'
+ +'</style></head><body>'
+ +'<header><h1>🧾 كشف حساب مفصّل — تتبّع المصروفات</h1><div class="sub">النطاق: '+esc(scope)+' • الفترة: '+period+'<br>أُنشئ في '+new Date().toLocaleString('ar')+' • '+d.count+' حركة مشمولة</div></header>'
+ +'<div class="tiles">'
+ +'<div class="tile"><div class="k">الرصيد الافتتاحي</div><div class="v">'+fmt(d.opening)+'</div></div>'
+ +'<div class="tile"><div class="k">إجمالي الدخل</div><div class="v" style="color:#177245">'+fmt(d.incTotal)+'</div></div>'
+ +'<div class="tile"><div class="k">إجمالي المصروفات</div><div class="v" style="color:#B3261E">'+fmt(d.expTotal)+'</div></div>'
+ +'<div class="tile"><div class="k">صافي الفترة</div><div class="v">'+fmt(Math.round((d.incTotal-d.expTotal)*100)/100)+'</div></div>'
+ +'<div class="tile"><div class="k">الرصيد الختامي</div><div class="v">'+fmt(d.closing)+'</div></div>'
+ +'</div>'
+ +'<h2>💸 المصروفات حسب الفئة</h2><table><tr><th>الفئة</th><th>عدد الحركات</th><th>المجموع</th><th>النسبة</th></tr>'+(catRows||'<tr><td colspan="4">لا مصروفات في هذا النطاق</td></tr>')+'</table>'
+ +(incRows?'<h2>💰 الدخل حسب الفئة</h2><table><tr><th>الفئة</th><th>عدد الحركات</th><th>المجموع</th><th>النسبة</th></tr>'+incRows+'</table>':'')
+ +'<h2>📋 جميع الحركات بالترتيب الزمني</h2><table><tr><th>التاريخ</th><th>البيان</th><th>الحساب</th><th>المبلغ</th><th>الرصيد بعده</th></tr>'+body+'</table>'
+ +'<footer>وُثّق هذا الكشف آليًا من بيانات تطبيق «تتبّع المصروفات» المحفوظة على هاتفك فقط — الرصيد الختامي يطابق أرصدة التطبيق في نهاية الفترة.<br>تتبّع المصروفات — كشف حساب مفصّل</footer>'
+ +'</body></html>'}
+function renderStatementAll(){const M=$('stmtMonth').value||ym(new Date());const data=buildStatementData(M+'-01',M+'-31','all');
+ stmtCache='🧾 كشف كل الحسابات — '+M+'\nالرصيد الافتتاحي: '+fmt(data.opening)+'\n'+data.rows.map(r=>r.date+' • '+r.lab+' • '+(r.amount>=0?'+':'−')+fmt(Math.abs(r.amount))+' • الرصيد: '+fmt(r.bal)).join('\n')+'\nالرصيد الختامي: '+fmt(data.closing);
+ $('stmtBox').innerHTML='<p>الافتتاحي: <b>'+fmt(data.opening)+'</b> • الختامي: <b>'+fmt(data.closing)+'</b> • '+data.count+' حركة (كل الحسابات)</p>'+(data.rows.length?data.rows.map(r=>'<div class="kv"><span>'+r.date+' • '+esc(r.lab)+' <span class="ds">('+esc(r.accName)+')</span></span><b style="color:'+(r.amount>=0?'var(--green)':'var(--red)')+'">'+(r.amount>=0?'+':'−')+fmt(Math.abs(r.amount))+'</b></div><div class="ds">الرصيد بعدها: '+fmt(r.bal)+'</div>').join(''):'<p class="mut">لا حركات في هذا الشهر.</p>')}
+const __rsV15=renderStatement;renderStatement=function(){if($('stmtAcct').value==='all')renderStatementAll();else __rsV15()};
+async function exportPdf(){const acct=$('stmtAcct').value;const r=$('pdfRange').value;let from='',to='';const now=new Date();const M=ym(now);
+ if(r==='month'){from=M+'-01';to=M+'-'+String(new Date(now.getFullYear(),now.getMonth()+1,0).getDate()).padStart(2,'0')}
+ else if(r==='last'){const dd=new Date(now.getFullYear(),now.getMonth()-1,1);const lm=ym(dd);from=lm+'-01';to=lm+'-'+String(new Date(dd.getFullYear(),dd.getMonth()+1,0).getDate()).padStart(2,'0')}
+ else if(r==='3m'){const dd=new Date(now.getFullYear(),now.getMonth()-2,1);from=ym(dd)+'-01';to=todayStr()}
+ else if(r==='custom'){from=$('pdfFrom').value;to=$('pdfTo').value;if(!from||!to){toast('اختر تاريخي البداية والنهاية أولًا');return}}
+ const data=buildStatementData(from,to,acct);if(!data.count){toast('لا حركات في هذا النطاق — جرّب نطاقًا أوسع');return}
+ const html=renderStatementHtml(data);const BS=bsPlugin();
+ if(BS&&BS.makePdf){try{await BS.makePdf({html,name:'كشف-حساب-مفصل.pdf'});toast('✅ حُفظ كشف الحساب PDF في المكان الذي اخترته')}catch(e){const m=(e&&e.message)||'';toast(m.indexOf('cancelled')>-1?'أُلغي الحفظ — لم يُحفَظ أي ملف':'⚠️ تعذّر إنشاء ملف PDF')}}
+ else{const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();try{w.focus()}catch(e){}setTimeout(()=>{try{w.print()}catch(e){}},500)}else toast('تصدير PDF يعمل داخل التطبيق المثبّت')}}
+$('pdfBtn').onclick=exportPdf;
+$('pdfRange').onchange=e=>{$('pdfDates').style.display=e.target.value==='custom'?'grid':'none'};
+
